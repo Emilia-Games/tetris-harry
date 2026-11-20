@@ -180,7 +180,7 @@
 <script>
 "use strict";
 /* ================= DISEÑO RESPONSIVE ================= */
-function layoutMode(){const w=innerWidth,h=innerHeight;if(w>=1100)return 'desktop';if(w>=720)return 'tablet';if(h<=w&&h<540)return 'phone-l';return 'phone-p';}
+function layoutMode(){const w=innerWidth,h=innerHeight;if(w>=1100)return 'desktop';if(h<=w&&h<540)return 'phone-l';if(w<720||w<920&&h>w)return 'phone-p';if(w>=720)return 'tablet';return 'phone-p';}
 function setLayout(){const touch=matchMedia('(hover:none) and (pointer:coarse)').matches||navigator.maxTouchPoints>0;
  document.body.classList.toggle('touch-ui',touch);document.body.dataset.layout=layoutMode();syncSelTabs();if(window.G?.P)fitBoards();}
 function syncSelTabs(){const narrow=innerWidth<720,tab=document.querySelector('#selTabs button.active')?.dataset.tab||'hero';
@@ -597,13 +597,19 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
  const vh=(vv?vv.height:innerHeight),vw=(vv?vv.width:innerWidth);const tb=document.getElementById('topBar').offsetHeight||48;
  const dock=document.getElementById('touchDock');const tc=(dock&&getComputedStyle(dock).display!=='none'&&dock.offsetHeight)?dock.offsetHeight:0;
  let avH,avW,cellMin=11,cellMax=34;
- if(mode==='phone-p'){const rival=Math.min(118,vh*.16);const hud=76;avH=vh-tb-tc-rival-hud-14;avW=vw-28;cellMin=14;cellMax=32;}
+ if(mode==='phone-p'){const short=vh<720;const rival=short?94:112;const hud=short?90:102;avH=vh-tb-tc-rival-hud-16;avW=vw-16;cellMin=12;cellMax=short?26:34;}
  else if(mode==='phone-l'){avH=vh-tb-12;avW=(vw-150)/2;cellMin=10;cellMax=26;}
  else if(mode==='tablet'){const pw=200;avH=vh-tb-tc-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
  else{const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||200;avH=vh-tb-24;avW=(vw-2*pw-100)/2;cellMin=14;cellMax=34;}
  avH=Math.max(avH,vh*(mode==='phone-p'?0.42:0.35));avW=Math.max(avW,vw*(mode==='phone-p'?0.88:0.2));
- CELL=Math.max(cellMin,Math.min(cellMax,Math.floor(Math.min(avH/ROWS,avW/COLS))));
- for(const B of [Game.P,Game.V])if(B){B.cv.width=CELL*COLS;B.cv.height=CELL*ROWS;}}
+ const pCell=Math.max(cellMin,Math.min(cellMax,Math.floor(Math.min(avH/ROWS,avW/COLS))));
+ CELL=pCell;
+ if(mode==='phone-p'){
+  const vCell=Math.max(7,Math.min(10,Math.floor(84/COLS)));
+  if(Game.P?.cv){Game.P.cv.width=pCell*COLS;Game.P.cv.height=pCell*ROWS;}
+  if(Game.V?.cv){Game.V.cv.width=vCell*COLS;Game.V.cv.height=vCell*ROWS;}
+ }else for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}}
+window.fitBoards=fitBoards;
 function onViewportChange(){fitFx();setLayout();}
 addEventListener('resize',onViewportChange);addEventListener('orientationchange',()=>setTimeout(onViewportChange,120));
 if(window.visualViewport){visualViewport.addEventListener('resize',onViewportChange);visualViewport.addEventListener('scroll',onViewportChange);}
@@ -690,16 +696,16 @@ function drawMini(cv,t,B){if(!cv)return;const c=cv.getContext('2d');c.clearRect(
  const ox=(cv.width-(maxx-minx+1)*s)/2-minx*s,oy=(cv.height-(maxy-miny+1)*s)/2-miny*s;
  m.forEach((r,y)=>r.forEach((v,x)=>{if(v)drawBlock(c,ox+x*s,oy+y*s,s,colorOf(B,t));}));}
 function drawSide(B){drawMini($s(B,'Next'),B.next,B);const h=$s(B,'Hold');if(h){drawMini(h,B.hold,B);h.style.opacity=B.canHold?1:.45;}}
-function drawBoard(B,time){const c=B.ctx,W=B.cv.width,H=B.cv.height;c.clearRect(0,0,W,H);
- c.strokeStyle='rgba(255,255,255,.06)';c.lineWidth=1;for(let x=1;x<COLS;x++){c.beginPath();c.moveTo(x*CELL+.5,0);c.lineTo(x*CELL+.5,H);c.stroke();}
- for(let y=1;y<ROWS;y++){c.beginPath();c.moveTo(0,y*CELL+.5);c.lineTo(W,y*CELL+.5);c.stroke();}
+function drawBoard(B,time){const c=B.ctx,W=B.cv.width,H=B.cv.height,cell=W/COLS;c.clearRect(0,0,W,H);
+ c.strokeStyle='rgba(255,255,255,.06)';c.lineWidth=1;for(let x=1;x<COLS;x++){c.beginPath();c.moveTo(x*cell+.5,0);c.lineTo(x*cell+.5,H);c.stroke();}
+ for(let y=1;y<ROWS;y++){c.beginPath();c.moveTo(0,y*cell+.5);c.lineTo(W,y*cell+.5);c.stroke();}
  for(let i=0;i<14;i++){const sx=(i*73)%W,sy=(i*131)%H;c.globalAlpha=.25+.25*Math.sin(time/600+i);c.fillStyle='#fff';sparkle(c,sx,sy,2+(i%3));}c.globalAlpha=1;
- for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const t=B.grid[y][x];if(t)drawBlock(c,x*CELL,y*CELL,CELL,colorOf(B,t),t==='G');}
- if(B.flashT>0){c.fillStyle=`rgba(255,255,220,${B.flashT/250*.7})`;c.fillRect(0,ROWS*CELL-B.flash.length*CELL,W,B.flash.length*CELL);}
+ for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const t=B.grid[y][x];if(t)drawBlock(c,x*cell,y*cell,cell,colorOf(B,t),t==='G');}
+ if(B.flashT>0){c.fillStyle=`rgba(255,255,220,${B.flashT/250*.7})`;c.fillRect(0,H-B.flash.length*cell,W,B.flash.length*cell);}
  if(B.cur&&!Game.over){const p=B.cur,gy=ghostY(B),col=colorOf(B,p.t);
-  p.m.forEach((row,y)=>row.forEach((v,x)=>{if(v&&gy+y>=0){const X=(p.x+x)*CELL,Y=(gy+y)*CELL;c.save();c.globalAlpha=.28;c.fillStyle=col;rr(c,X+3,Y+3,CELL-6,CELL-6,CELL*.22);c.fill();
+  p.m.forEach((row,y)=>row.forEach((v,x)=>{if(v&&gy+y>=0){const X=(p.x+x)*cell,Y=(gy+y)*cell;c.save();c.globalAlpha=.28;c.fillStyle=col;rr(c,X+3,Y+3,cell-6,cell-6,cell*.22);c.fill();
    c.globalAlpha=.8;c.setLineDash([4,3]);c.lineWidth=2;c.strokeStyle=col;c.stroke();c.restore();}}));
-  c.save();c.shadowColor=col;c.shadowBlur=12;p.m.forEach((row,y)=>row.forEach((v,x)=>{if(v&&p.y+y>=0)drawBlock(c,(p.x+x)*CELL,(p.y+y)*CELL,CELL,col);}));c.restore();}}
+  c.save();c.shadowColor=col;c.shadowBlur=12;p.m.forEach((row,y)=>row.forEach((v,x)=>{if(v&&p.y+y>=0)drawBlock(c,(p.x+x)*cell,(p.y+y)*cell,cell,col);}));c.restore();}}
 /* ---- IA del rival: lenta, con errores a propósito ---- */
 function evalPlace(B,m,px,py){const g=B.grid.map(r=>r.slice());let above=false;
  m.forEach((row,y)=>row.forEach((v,x)=>{if(v){if(py+y<0)above=true;else g[py+y][px+x]=1;}}));
