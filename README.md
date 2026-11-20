@@ -4,6 +4,8 @@ Duelo de dos tableros contra la computadora: elige tu personaje y al oponente po
 
 ## Controles
 
+### Teclado (ordenador)
+
 | Acción | Tecla |
 |--------|--------|
 | Mover pieza | Flechas ← → |
@@ -13,7 +15,11 @@ Duelo de dos tableros contra la computadora: elige tu personaje y al oponente po
 | Guardar pieza | C |
 | Pausa | P |
 
-En pantallas táctiles también hay botones en pantalla para jugar sin teclado.
+### Pantalla táctil (móvil y tablet)
+
+- **Botones** debajo de tu tablero: izquierda, girar, derecha, bajar, caída rápida, guardar y pausa (mantén pulsado ← o → para repetir el movimiento).
+- **Gestos en tu tablero**: toque corto para **girar**; desliza **horizontalmente** para mover; desliza **hacia abajo** para bajar o soltar enérgicamente si el gesto es largo.
+- Botones de **música** y **sonido** arriba a la derecha; el juego respeta el área segura del notch y se puede **añadir a la pantalla de inicio** (icono y manifiesto incluidos).
 
 ## Cómo jugar
 
