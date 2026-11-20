@@ -112,17 +112,33 @@
     <div class="sideWrap player">
       <div class="phud glass" id="phud" hidden></div>
       <div class="sideRow">
-        <div class="panel good glass player-panel">
-          <div class="avatarBig" id="pAv"></div>
-          <div class="pname" id="pName"></div>
-          <div class="tag" id="pTag">🧒 ¡Tú!</div>
-          <div class="hpWrap"><div class="hpLabel">💛 Tu magia</div><div class="hpBar"><div class="hpFill good" id="pHpFill"></div><div class="hpTxt" id="pHpTxt">100</div></div></div>
-          <div class="statsLine">
-            <div class="stat"><span>⭐ Puntos</span><b id="pScore">0</b></div>
-            <div class="stat"><span>🏆 Nivel</span><b id="pLevel">1</b></div>
-            <div class="stat"><span>📏 Líneas</span><b id="pLines">0</b></div>
+        <div class="playerAside">
+          <div class="panel good glass player-panel">
+            <div class="avatarBig" id="pAv"></div>
+            <div class="pname" id="pName"></div>
+            <div class="tag" id="pTag">🧒 ¡Tú!</div>
+            <div class="hpWrap"><div class="hpLabel">💛 Tu magia</div><div class="hpBar"><div class="hpFill good" id="pHpFill"></div><div class="hpTxt" id="pHpTxt">100</div></div></div>
+            <div class="statsLine">
+              <div class="stat"><span>⭐ Puntos</span><b id="pScore">0</b></div>
+              <div class="stat"><span>🏆 Nivel</span><b id="pLevel">1</b></div>
+              <div class="stat"><span>📏 Líneas</span><b id="pLines">0</b></div>
+            </div>
+            <div class="ghelp kbd-only"><kbd>⬅️</kbd><kbd>➡️</kbd> mover · <kbd>⬆️</kbd> girar<br><kbd>⬇️</kbd> bajar · <kbd>Espacio</kbd> caer<br><kbd>C</kbd> guardar · <kbd>P</kbd> pausa</div>
           </div>
-          <div class="ghelp kbd-only"><kbd>⬅️</kbd><kbd>➡️</kbd> mover · <kbd>⬆️</kbd> girar<br><kbd>⬇️</kbd> bajar · <kbd>Espacio</kbd> caer<br><kbd>C</kbd> guardar · <kbd>P</kbd> pausa</div>
+          <nav id="touchPad" class="touch-pad" aria-label="Mando táctil">
+            <div class="pad-dpad" aria-label="Cruceta">
+              <button type="button" class="tbtn pad-up" data-a="rot" aria-label="Girar">⬆️</button>
+              <button type="button" class="tbtn pad-left" data-a="left" aria-label="Izquierda">⬅️</button>
+              <span class="pad-hub" aria-hidden="true"></span>
+              <button type="button" class="tbtn pad-right" data-a="right" aria-label="Derecha">➡️</button>
+              <button type="button" class="tbtn pad-down" data-a="down" aria-label="Bajar">⬇️</button>
+            </div>
+            <div class="pad-actions" aria-label="Botones de acción">
+              <button type="button" class="tbtn drop pad-act" data-a="drop" aria-label="Caída rápida">⏬</button>
+              <button type="button" class="tbtn hold pad-act" data-a="hold" aria-label="Guardar">🎒</button>
+              <button type="button" class="tbtn pad-act" data-a="pause" aria-label="Pausa">⏸️</button>
+            </div>
+          </nav>
         </div>
         <div class="boardStage">
           <div class="mini flank"><span>Sig.</span><canvas id="pNext" width="72" height="48"></canvas></div>
@@ -184,8 +200,15 @@
 <script>
 "use strict";
 /* ================= DISEÑO RESPONSIVE ================= */
-function layoutMode(){const w=innerWidth,h=innerHeight;if(w>=1100)return 'desktop';if(h<=w&&h<540)return 'phone-l';if(w<720||w<920&&h>w)return 'phone-p';if(w>=720)return 'tablet';return 'phone-p';}
-function setLayout(){const touch=matchMedia('(hover:none) and (pointer:coarse)').matches||navigator.maxTouchPoints>0;
+function isCoarseTouch(){return matchMedia('(hover:none) and (pointer:coarse)').matches||navigator.maxTouchPoints>0;}
+function layoutMode(){const w=innerWidth,h=innerHeight,touch=isCoarseTouch();
+ if(h<=w&&h<540)return 'phone-l';
+ if(touch&&w>h&&w<1400)return 'touch-l';
+ if(w>=1100&&!touch)return 'desktop';
+ if(w<720||w<920&&h>w)return 'phone-p';
+ if(w>=720)return 'tablet';
+ return 'phone-p';}
+function setLayout(){const touch=isCoarseTouch();
  document.body.classList.toggle('touch-ui',touch);document.body.dataset.layout=layoutMode();syncSelTabs();if(window.G?.P)fitBoards();}
 function syncSelTabs(){const narrow=innerWidth<720,tab=document.querySelector('#selTabs button.active')?.dataset.tab||'hero';
  document.querySelectorAll('.sel-tab-panel').forEach(p=>{p.hidden=narrow&&p.dataset.panel!==tab;});}
@@ -598,6 +621,28 @@ function collide(B,m,px,py){for(let y=0;y<m.length;y++)for(let x=0;x<m[y].length
 function theme(){return THEMES.find(t=>t.id===sel.theme).c;}
 function colorOf(B,t){return t==='G'?GARBAGE:(B.side==='p'?theme():VPAL)[TYPES.indexOf(t)];}
 const FRAME_PAD=12;
+const DUEL_FRAME_LAYOUTS=new Set(['touch-l','phone-l','desktop','tablet']);
+function syncBoardFrames(){
+ const mode=document.body.dataset.layout||layoutMode();
+ if(!DUEL_FRAME_LAYOUTS.has(mode))return;
+ if(!document.getElementById('gameScreen')?.classList.contains('show'))return;
+ const pCol=document.querySelector('.sideWrap.player .boardCol, #pSwipe');
+ const vCol=document.querySelector('.sideWrap.rival .rival-mini, .sideWrap.rival .boardCol');
+ const pFrame=document.getElementById('pFrame'),vFrame=document.getElementById('vFrame');
+ const pPanel=document.querySelector('.sideWrap.player .player-panel');
+ const vPanel=document.querySelector('.sideWrap.rival .rival-panel');
+ if(pCol)pCol.style.marginTop='';
+ if(vCol)vCol.style.marginTop='';
+ if(pPanel)pPanel.style.marginTop='';
+ if(vPanel)vPanel.style.marginTop='';
+ if(!pCol||!vCol||!pFrame||!vFrame)return;
+ if(pPanel&&vPanel){
+  const dp=vPanel.getBoundingClientRect().top-pPanel.getBoundingClientRect().top;
+  if(Math.abs(dp)>0.5){if(dp>0)pPanel.style.marginTop=`${dp}px`;else vPanel.style.marginTop=`${-dp}px`;}
+ }
+ const dTop=vFrame.getBoundingClientRect().top-pFrame.getBoundingClientRect().top;
+ if(Math.abs(dTop)>0.5){if(dTop>0)pCol.style.marginTop=`${dTop}px`;else vCol.style.marginTop=`${-dTop}px`;}
+}
 function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const vv=window.visualViewport;
  const vh=(vv?vv.height:innerHeight),vw=(vv?vv.width:innerWidth);const tb=document.getElementById('topBar').offsetHeight||48;
  const dock=document.getElementById('touchDock');const dockOn=dock&&getComputedStyle(dock).display!=='none';
@@ -626,10 +671,21 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
   const touch=document.querySelectorAll('#gameWrap .touch-edge');
   let touchW=112;touch.forEach(el=>{touchW+=el.getBoundingClientRect().width||52;});
   const vsW=36;avW=(vw-touchW-vsW-12)/2;
- }else if(mode==='tablet'){const pw=200;avH=vh-tb-tc-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
+ }else if(mode==='touch-l'){
+  const margin=8;
+  avH=vh-tb-margin;cellMin=12;cellMax=Math.floor(avH/ROWS);
+  const aside=document.querySelector('.sideWrap.player .playerAside');
+  const pwP=aside?.getBoundingClientRect().width||document.querySelector('.sideWrap.player .panel')?.offsetWidth||175;
+  const pwV=document.querySelector('.sideWrap.rival .panel')?.getBoundingClientRect().width||pwP;
+  let slotW=(vw-48-32-pwP-pwV)/2;
+  const colP=document.querySelector('.sideWrap.player .boardCol, #pSwipe');
+  const colV=document.querySelector('.sideWrap.rival .rival-mini');
+  if(colP?.clientWidth&&colV?.clientWidth)slotW=Math.min(colP.clientWidth,colV.clientWidth,slotW);
+  avW=slotW;
+ }else if(mode==='tablet'){const pw=200;avH=vh-tb-(dockOn?tc:0)-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
  else{const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||200;avH=vh-tb-24;avW=(vw-2*pw-100)/2;cellMin=14;cellMax=34;}
  if(mode==='desktop'||mode==='tablet'){avH=Math.max(avH,vh*.35);avW=Math.max(avW,vw*.2);}
- else if(mode==='phone-l'){avH=Math.max(0,avH);avW=Math.max(avW,60);}
+ else if(mode==='phone-l'||mode==='touch-l'){avH=Math.max(0,avH);avW=Math.max(avW,60);}
  else avH=Math.max(0,avH);
  let pCell=Math.max(cellMin,Math.min(cellMax,Math.floor(Math.min(avH/ROWS,avW/COLS))));
  if(mode==='phone-p'&&Game.P?.cv){
@@ -648,16 +704,33 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
    if(Game.V?.cv){Game.V.cv.width=vCell*COLS;Game.V.cv.height=vCell*ROWS;}
   }else{
    for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
-   if(mode==='phone-l'&&Game.P?.cv&&innerHeight<500){
-    const limit=innerHeight-6;
+   if(mode==='touch-l'&&Game.P?.cv){
+    const limit=vh-4;
     while(pCell>8){
-     const fb=Game.P.cv.closest('.boardFrame')?.getBoundingClientRect().bottom||0;
-     if(fb<=limit)break;pCell--;
+     let ok=true;
+     for(const id of ['pFrame','vFrame']){
+      const fb=document.getElementById(id)?.getBoundingClientRect().bottom||0;
+      if(fb>limit){ok=false;break;}
+     }
+     if(ok)break;pCell--;
+     for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
+    }
+    CELL=pCell;
+   }else if(mode==='phone-l'&&Game.P?.cv){
+    const limit=vh-4;
+    while(pCell>8){
+     let ok=true;
+     for(const id of ['pFrame','vFrame']){
+      const fb=document.getElementById(id)?.getBoundingClientRect().bottom||0;
+      if(fb>limit){ok=false;break;}
+     }
+     if(ok)break;pCell--;
      for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
     }
     CELL=pCell;
    }
-  }}}
+  }}
+ syncBoardFrames();}
 window.fitBoards=fitBoards;
 function onViewportChange(){fitFx();setLayout();}
 addEventListener('resize',onViewportChange);addEventListener('orientationchange',()=>setTimeout(onViewportChange,120));
@@ -806,7 +879,7 @@ addEventListener('keydown',e=>{if(!document.getElementById('gameScreen').classLi
   z:()=>rotate(P,-1),Z:()=>rotate(P,-1),x:()=>rotate(P,1),X:()=>rotate(P,1),c:()=>doHold(P),C:()=>doHold(P),Shift:()=>doHold(P),p:togglePause,P:togglePause,Escape:togglePause};
  if(map[e.key]){e.preventDefault();ac();map[e.key]();}});
 const ACT={left:()=>move(Game.P,-1),right:()=>move(Game.P,1),down:()=>softDrop(Game.P),rot:()=>rotate(Game.P,1),drop:()=>hardDrop(Game.P),hold:()=>doHold(Game.P),pause:togglePause};
- document.querySelectorAll('.tbtn, .touch-edge .tbtn').forEach(b=>{let t1,t2;const a=b.dataset.a,rep=['left','right','down'].includes(a);
+ document.querySelectorAll('#touch .tbtn, .touch-edge .tbtn, #touchPad .tbtn').forEach(b=>{if(!b.dataset.a)return;let t1,t2;const a=b.dataset.a,rep=['left','right','down'].includes(a);
  const stop=()=>{clearTimeout(t1);clearInterval(t2);};
  b.addEventListener('pointerdown',e=>{e.preventDefault();ac();ACT[a]();if(rep){t1=setTimeout(()=>{t2=setInterval(ACT[a],70)},220);}});
  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));});
@@ -814,7 +887,7 @@ const ACT={left:()=>move(Game.P,-1),right:()=>move(Game.P,1),down:()=>softDrop(G
 (function(){const zone=document.getElementById('pSwipe');if(!zone)return;let sx=0,sy=0,active=false,pid=null;
  const end=()=>{active=false;pid=null;};
  zone.addEventListener('pointerdown',e=>{if(!document.getElementById('gameScreen').classList.contains('show'))return;
-  if(e.target.closest('#touch,.btn'))return;active=true;sx=e.clientX;sy=e.clientY;pid=e.pointerId;zone.setPointerCapture(e.pointerId);ac();});
+  if(e.target.closest('#touch,#touchPad,.btn'))return;active=true;sx=e.clientX;sy=e.clientY;pid=e.pointerId;zone.setPointerCapture(e.pointerId);ac();});
  zone.addEventListener('pointerup',e=>{if(!active||e.pointerId!==pid)return;end();
   const dx=e.clientX-sx,dy=e.clientY-sy,d=Math.hypot(dx,dy);if(d<22){rotate(Game.P,1);return;}
   if(Math.abs(dx)>Math.abs(dy)){move(Game.P,dx>0?1:-1);}else if(dy>28)hardDrop(Game.P);else if(dy>0)softDrop(Game.P);});
