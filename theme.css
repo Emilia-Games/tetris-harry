@@ -2,21 +2,21 @@
 
 @font-face {
   font-family: MedievalSharp;
-  src: url(../fonts/MedievalSharp-Regular.ttf) format("truetype");
+  src: url(fonts/MedievalSharp.woff) format("woff");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: Nunito;
-  src: url(../fonts/Nunito-Regular.ttf) format("truetype");
+  src: url(fonts/Nunito-Regular.woff) format("woff");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: Nunito;
-  src: url(../fonts/Nunito-Bold.ttf) format("truetype");
+  src: url(fonts/Nunito-Bold.woff) format("woff");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -802,3 +802,182 @@ body.touch-ui:not([data-layout]) #gameScreen.show {
   .hpFill::after { animation: none; opacity: 0.2; }
   #playBtn:not(:disabled), #playBtn.glow:not(:disabled), .card.sel { animation: none; }
 }
+
+/* --- Rediseño: rejilla del duelo + dock táctil --- */
+#gameScreen.show {
+  display: grid !important;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas: "topbar" "arena" "dock";
+  align-items: stretch;
+  width: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+#gameScreen #topBar { grid-area: topbar; }
+#gameScreen #gameWrap { grid-area: arena; min-height: 0; overflow: hidden; }
+#gameScreen #touchDock {
+  grid-area: dock;
+  display: none;
+  padding: 8px 10px calc(10px + var(--safe-b));
+  background: linear-gradient(0deg, rgba(10, 8, 36, 0.95), rgba(10, 8, 36, 0.72) 40%, transparent);
+  border-top: 2px solid rgba(255, 216, 107, 0.35);
+  backdrop-filter: blur(12px);
+}
+body.touch-ui #gameScreen #touchDock { display: block; }
+body.touch-ui #gameScreen #touchDock .touch-dock {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.btn.play-magic.glow:not(:disabled) {
+  animation: playGlow 1.4s ease-in-out infinite alternate;
+  box-shadow: 0 0 0 4px rgba(255, 216, 107, 0.45), 0 10px 40px rgba(255, 138, 61, 0.55), 0 6px 0 #b4501a;
+  letter-spacing: 0.5px;
+}
+@keyframes playGlow {
+  from { filter: brightness(1); transform: scale(1); }
+  to { filter: brightness(1.12); transform: scale(1.04); box-shadow: 0 0 0 6px rgba(255, 216, 107, 0.65), 0 0 42px rgba(255, 200, 80, 0.7), 0 6px 0 #b4501a; }
+}
+
+.parchment.help {
+  background: linear-gradient(165deg, var(--parchment-top), var(--parchment-bot));
+  color: var(--parchment-ink);
+  border: 2px solid var(--parchment-border);
+}
+.parchment.help b { color: #8a4a12; }
+
+.hpFill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: hpShine 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.hpFill.hp-pulse { animation: hpBump 0.35s ease-out; }
+@keyframes hpShine { 0% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+@keyframes hpBump { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.25); } }
+
+#gameScreen.screenShake { animation: duelShake 0.42s ease-out; }
+@keyframes duelShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@media (max-width: 719px) {
+  .selTabs { display: flex !important; }
+  #selWrap { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  #selWrap .center { order: -2; }
+  #heroCards, #villainCards { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; }
+  #selWrap .lvRow { flex-direction: column; background: transparent; padding: 0; gap: 6px; }
+  #selWrap .lvLbl { flex: none; width: 100%; flex-direction: row; gap: 8px; padding: 6px; }
+  #selWrap .lvCards { flex-wrap: wrap; justify-content: center; }
+  #selWrap .lvCards .card { flex: 0 1 calc(33% - 6px); min-width: 100px; }
+}
+
+body[data-layout="phone-p"] #gameScreen #gameWrap {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 4px 6px;
+}
+body[data-layout="phone-p"] .sideWrap.rival {
+  order: -1;
+  width: 100%;
+  max-width: 100%;
+}
+body[data-layout="phone-p"] .sideWrap.rival .sideRow {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  border: 2px solid rgba(170, 140, 255, 0.55);
+  backdrop-filter: blur(var(--glass-blur));
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-mini {
+  transform: scale(0.42);
+  transform-origin: center;
+  margin: -28% 0;
+  flex: none;
+  pointer-events: none;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .avatarBig { width: 40px; height: 40px; }
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .stat,
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .minis,
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .spellTip { display: none !important; }
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .pname { font-size: 0.75rem; }
+body[data-layout="phone-p"] .sideWrap.player { width: 100%; flex: 1; min-height: 0; }
+body[data-layout="phone-p"] .sideWrap.player .sideRow {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+body[data-layout="phone-p"] .sideWrap.player .player-panel {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 6px;
+  padding: 6px 8px;
+  order: -1;
+}
+body[data-layout="phone-p"] .sideWrap.player .player-panel .avatarBig,
+body[data-layout="phone-p"] .sideWrap.player .player-panel .pname,
+body[data-layout="phone-p"] .sideWrap.player .player-panel .tag,
+body[data-layout="phone-p"] .sideWrap.player .player-panel .ghelp { display: none; }
+body[data-layout="phone-p"] .sideWrap.player .player-panel .stat { width: auto; flex: 1 1 88px; font-size: 0.72rem; }
+body[data-layout="phone-p"] .sideWrap.player .player-panel .minis { flex-direction: row; width: auto; }
+body[data-layout="phone-p"] .sideWrap.player .player-panel .hpWrap { flex: 1 1 140px; min-width: 120px; }
+body[data-layout="phone-p"] .sideWrap.player .boardCol { flex: 1; display: flex; justify-content: center; min-height: 0; }
+
+body[data-layout="phone-l"] #gameScreen #gameWrap {
+  display: grid !important;
+  grid-template-columns: minmax(52px, auto) 1fr 40px 1fr minmax(52px, auto);
+  grid-template-areas: "touchL player vs rival touchR";
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+}
+body[data-layout="phone-l"] .touch-edge.left { grid-area: touchL; }
+body[data-layout="phone-l"] .sideWrap.player { grid-area: player; }
+body[data-layout="phone-l"] .vsCol { grid-area: vs; display: block !important; font-size: 0.85rem; }
+body[data-layout="phone-l"] .sideWrap.rival { grid-area: rival; }
+body[data-layout="phone-l"] .touch-edge.right { grid-area: touchR; }
+body[data-layout="phone-l"] .sideWrap .panel { display: none !important; }
+body[data-layout="phone-l"] .sideWrap .sideRow { flex-direction: column; align-items: center; }
+body[data-layout="phone-l"] #gameScreen #touchDock { display: none !important; }
+
+.glass.side::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 216, 107, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.side { position: relative; }

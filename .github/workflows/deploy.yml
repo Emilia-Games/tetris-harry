@@ -33,8 +33,8 @@ jobs:
       - name: Preparar solo archivos del juego
         run: |
           set -euo pipefail
-          mkdir -p deploy/screenshots deploy/icons
-          cp index.html manifest.webmanifest deploy/
+          mkdir -p deploy/screenshots deploy/icons deploy/fonts
+          cp index.html manifest.webmanifest theme.css deploy/
           # Solo imágenes sueltas del README (p. ej. selection.png); no screenshots/responsive/ del PR.
           shopt -s nullglob
           for asset in screenshots/*.png screenshots/*.jpg screenshots/*.jpeg screenshots/*.webp; do
@@ -42,6 +42,9 @@ jobs:
           done
           for asset in icons/*; do
             cp "$asset" deploy/icons/
+          done
+          for asset in fonts/*; do
+            cp "$asset" deploy/fonts/
           done
 
       - name: Subir por FTP/FTPS

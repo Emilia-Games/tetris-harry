@@ -13,224 +13,7 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png" sizes="180x180">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Tetris Mágico de Hogwarts</title>
-<style>
-:root{--gold:#ffd86b;--ink:#2b1650;--safe-t:env(safe-area-inset-top,0px);--safe-r:env(safe-area-inset-right,0px);--safe-b:env(safe-area-inset-bottom,0px);--safe-l:env(safe-area-inset-left,0px);--focus-ring:0 0 0 3px #ffd86b,0 0 20px rgba(255,216,107,.8);}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
-body{font-family:"Comic Neue","Chalkboard SE","Trebuchet MS","Segoe UI",system-ui,sans-serif;color:#fff;
-  background:radial-gradient(ellipse at 50% 0%,#3b2a8a 0%,#1b1350 45%,#0a0a2a 100%);user-select:none;
-  padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);}
-#sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle 3s infinite ease-in-out}
-@keyframes twinkle{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
-#moon{position:absolute;top:5%;right:7%;width:90px;height:90px;border-radius:50%;
-  background:radial-gradient(circle at 35% 35%,#fffbe6,#ffe9a8 60%,#f6d77a);box-shadow:0 0 60px 20px rgba(255,236,160,.35)}
-#castle{position:absolute;left:0;right:0;bottom:0;width:100%;height:38vh;opacity:.9}
-.shoot{position:absolute;width:120px;height:2px;background:linear-gradient(90deg,#fff,transparent);transform:rotate(-20deg);opacity:0;animation:shoot 7s infinite}
-@keyframes shoot{0%{opacity:0;transform:translate(0,0) rotate(-20deg)}3%{opacity:1}10%{opacity:0;transform:translate(-400px,150px) rotate(-20deg)}100%{opacity:0}}
-#fx{position:fixed;inset:0;z-index:50;pointer-events:none}
-.screen{position:fixed;inset:0;z-index:5;display:none;flex-direction:column;align-items:center}
-.screen.show{display:flex}
-#gameScreen.screen.show{height:100%;max-height:100dvh;touch-action:none;overscroll-behavior:none}
-.titleRow{display:flex;align-items:center;justify-content:center;gap:clamp(8px,2vw,16px);flex-wrap:wrap;margin-top:max(8px,var(--safe-t));padding:0 12px;width:100%}
-.gameLogo{width:clamp(52px,11vw,80px);height:clamp(52px,11vw,80px);flex:none;filter:drop-shadow(0 4px 14px rgba(255,216,107,.65))}
-h1.title{margin-top:0;font-size:clamp(26px,4.2vw,48px);letter-spacing:1px;text-align:center;
-  background:linear-gradient(180deg,#fff6c9,#ffd86b 50%,#ff9f43);-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 3px 0 #6b3fa0) drop-shadow(0 0 14px rgba(255,216,107,.6))}
-.subtitle{font-size:clamp(14px,1.6vw,19px);color:#e8dcff;margin-bottom:6px;text-align:center}
-#selWrap{display:flex;gap:18px;width:100%;max-width:1400px;padding:0 16px;flex:1;min-height:0;align-items:stretch;justify-content:center}
-.side{flex:1 1 0;max-width:470px;border-radius:26px;padding:12px;display:flex;flex-direction:column;min-height:0}
-.side.good{background:linear-gradient(180deg,rgba(255,190,90,.25),rgba(255,120,80,.12));border:3px solid rgba(255,214,120,.7)}
-.side.bad{background:linear-gradient(180deg,rgba(120,255,170,.16),rgba(80,40,140,.25));border:3px solid rgba(170,140,255,.6)}
-.side h2{text-align:center;font-size:clamp(18px,2vw,26px);margin-bottom:8px;text-shadow:0 2px 0 rgba(0,0,0,.4)}
-.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;overflow:auto;padding:6px}
-#selWrap .cards{display:flex!important;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:8px}
-#selWrap .card{padding:6px 3px 7px;border-radius:16px}
-#selWrap .card svg{width:min(64px,8.2vh,78%);height:auto;aspect-ratio:1}
-#selWrap .card .nm{font-size:clamp(11px,1.05vw,14px);line-height:1.1}
-#selWrap .card .ds{font-size:clamp(9.5px,.85vw,11.5px);line-height:1.1}
-#selWrap .side{max-width:520px}
-#selWrap .cards{display:flex!important;flex-direction:column;flex-wrap:nowrap;gap:5px;overflow-y:auto;padding:4px 6px 8px}
-.lvRow{display:flex;align-items:stretch;gap:6px;border-radius:14px;padding:4px;background:rgba(255,255,255,.08)}
-.lvLbl{flex:0 0 46px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;font-weight:bold;font-size:12px;line-height:1.1;text-align:center;color:#2b1650}
-.lvLbl b{font-size:20px}
-.lv1 .lvLbl{background:#7dffb0}.lv2 .lvLbl{background:#9fe3ff}.lv3 .lvLbl{background:#ffe27a}.lv4 .lvLbl{background:#ffb37a}.lv5 .lvLbl{background:#ff8aa8}
-.lvCards{flex:1;display:flex;gap:6px;flex-wrap:wrap}
-#selWrap .lvCards .card{flex:0 0 calc(25% - 5px);min-width:0;padding:4px 2px 5px;position:relative;min-height:44px}
-#selWrap .card svg{width:min(52px,6.6vh,70%)!important;height:auto;aspect-ratio:1}
-#selWrap .card .ds{display:none}
-#selWrap .card .nm{font-size:clamp(10.5px,.95vw,13px)}
-.stars{font-size:10px;color:#e8a800;letter-spacing:-1px;line-height:1}
-.bad .stars{color:#a64dff}
-.lvTip{text-align:center;font-size:12px;color:#efe8ff;margin:-4px 0 4px}
-@media (max-width:900px){#selScreen{overflow-y:auto}#selWrap{flex-wrap:wrap;flex:none;gap:10px}#selWrap .side{flex:1 1 44%;max-width:none!important;min-height:auto}
- #selWrap .center{order:3;flex:1 1 100%;overflow:visible}.lvLbl{flex-basis:34px!important;font-size:10px}.lvLbl b{font-size:16px}#selWrap .lvCards .card{padding:3px 1px 4px}}
-#musicBtn{position:fixed;top:calc(10px + var(--safe-t));right:calc(72px + var(--safe-r));z-index:60;font-size:24px;width:54px;height:54px;border-radius:50%;border:3px solid rgba(255,255,255,.6);background:rgba(40,20,90,.85);backdrop-filter:blur(6px);cursor:pointer;color:#fff;transition:transform .12s,box-shadow .15s}
-#musicBtn:active{transform:scale(.94)}
-#musicBtn.off{opacity:.5;text-decoration:line-through}
-#selDesc{font-size:13px;text-align:center;color:#fff3c4;min-height:18px}
-.card{cursor:pointer;border:none;border-radius:20px;padding:8px 6px 10px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(235,225,255,.9));
-  color:var(--ink);font-family:inherit;display:flex;flex-direction:column;align-items:center;transition:transform .15s, box-shadow .2s;box-shadow:0 5px 0 rgba(0,0,0,.25)}
-.card:hover{transform:translateY(-3px) scale(1.03)}
-.card svg{width:min(88px,10vh);height:min(88px,10vh)}
-.card .nm{font-weight:bold;font-size:clamp(13px,1.3vw,16px);margin-top:2px;text-align:center}
-.card .ds{font-size:clamp(11px,1vw,13px);opacity:.75;text-align:center}
-.card.sel{transform:scale(1.06);animation:glow 1.2s infinite alternate}
-.good .card.sel{box-shadow:0 0 0 5px #ffd86b,0 0 30px 10px rgba(255,216,107,.85)}
-.bad .card.sel{box-shadow:0 0 0 5px #7dffb0,0 0 30px 10px rgba(125,255,176,.75)}
-@keyframes glow{from{filter:brightness(1)}to{filter:brightness(1.12)}}
-.center{flex:0 1 360px;display:flex;flex-direction:column;align-items:center;gap:10px;min-height:0;overflow:auto;padding:4px}
-.box{background:rgba(20,10,60,.62);border:3px solid rgba(255,255,255,.28);border-radius:22px;padding:10px;width:100%;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 28px rgba(0,0,0,.25)}
-.box h3{text-align:center;font-size:clamp(16px,1.6vw,20px);margin-bottom:6px;color:var(--gold)}
-.themes{display:flex;flex-direction:column;gap:6px}
-.theme{cursor:pointer;display:flex;align-items:center;gap:8px;border:none;border-radius:16px;padding:6px 10px;font-family:inherit;font-size:clamp(14px,1.4vw,17px);font-weight:bold;color:#fff;
-  background:rgba(255,255,255,.12);transition:transform .15s}
-.theme:hover{transform:scale(1.03)}
-.theme.sel{background:rgba(255,255,255,.3);box-shadow:0 0 0 3px #fff,0 0 18px rgba(255,255,255,.7)}
-.theme canvas{flex:none}
-.theme span{flex:1;text-align:left}
-.vs{font-size:22px;font-weight:bold;color:#fff3c4;text-align:center;min-height:28px}
-.btn{cursor:pointer;border:none;font-family:inherit;font-weight:bold;color:#fff;border-radius:999px;padding:12px 26px;font-size:20px;
-  background:linear-gradient(180deg,#ffcf4a,#ff8a3d);box-shadow:0 6px 0 #b4501a,0 10px 20px rgba(0,0,0,.35);text-shadow:0 2px 0 rgba(0,0,0,.25);transition:transform .1s}
-.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b4501a}
-.btn.big{font-size:clamp(24px,2.6vw,34px);padding:14px 44px}
-.btn:disabled{filter:grayscale(1) brightness(.8);cursor:not-allowed;opacity:.6}
-.btn.purple{background:linear-gradient(180deg,#b78bff,#7a4bff);box-shadow:0 6px 0 #4a24a8,0 10px 20px rgba(0,0,0,.35)}
-.btn.green{background:linear-gradient(180deg,#6ff0a5,#22b86b);box-shadow:0 6px 0 #137443,0 10px 20px rgba(0,0,0,.35)}
-.btn.small{font-size:16px;padding:8px 16px}
-#playBtn:not(:disabled){animation:pulse 1s infinite alternate}
-@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.07)}}
-.help{font-size:clamp(12px,1.2vw,15px);line-height:1.5;color:#efe8ff;text-align:center}
-.help b{color:var(--gold)}
-kbd{display:inline-block;background:#fff;color:var(--ink);border-radius:6px;padding:0 6px;font-family:inherit;font-weight:bold;box-shadow:0 2px 0 #999;margin:1px}
-#muteBtn{position:fixed;top:calc(10px + var(--safe-t));right:calc(12px + var(--safe-r));z-index:60;font-size:26px;width:54px;height:54px;border-radius:50%;border:3px solid rgba(255,255,255,.6);background:rgba(40,20,90,.85);backdrop-filter:blur(6px);cursor:pointer;color:#fff;transition:transform .12s}
-#muteBtn:active{transform:scale(.94)}
-.btn:focus-visible,.card:focus-visible,.theme:focus-visible,.tbtn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-/* game */
-#topBar{display:flex;gap:10px;justify-content:center;align-items:center;padding:8px;width:100%;padding-right:80px;padding-left:80px}
-#topBar .ttl{font-size:clamp(18px,2.2vw,28px);font-weight:bold;color:var(--gold);text-shadow:0 2px 0 #6b3fa0;margin:0 12px}
-#gameWrap{display:flex;gap:16px;align-items:flex-start;justify-content:center;width:100%;flex:1;min-height:0;padding:0 10px}
-.panel{width:clamp(170px,19vw,250px);border-radius:24px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:8px}
-.panel.good{background:linear-gradient(180deg,rgba(255,200,100,.3),rgba(255,120,80,.15));border:3px solid rgba(255,214,120,.8)}
-.panel.bad{background:linear-gradient(180deg,rgba(120,255,170,.2),rgba(80,40,140,.3));border:3px solid rgba(170,140,255,.7)}
-.avatarBig{width:clamp(90px,11vw,140px);height:clamp(90px,11vw,140px);border-radius:50%;background:#fff;padding:4px;box-shadow:0 0 0 4px rgba(255,255,255,.5),0 0 24px rgba(255,255,255,.4)}
-.avatarBig svg{width:100%;height:100%}
-.pname{font-weight:bold;font-size:clamp(15px,1.5vw,19px);text-align:center}
-.stat{width:100%;display:flex;justify-content:space-between;background:rgba(0,0,0,.25);border-radius:12px;padding:4px 10px;font-size:clamp(14px,1.4vw,18px)}
-.stat b{color:var(--gold)}
-.mini{background:rgba(0,0,0,.3);border-radius:14px;padding:6px;text-align:center;font-size:14px;width:100%}
-.mini canvas{display:block;margin:2px auto 0}
-.hpWrap{width:100%}
-.hpLabel{font-size:14px;text-align:center;margin-bottom:3px}
-.hpBar{width:100%;height:24px;border-radius:12px;background:rgba(0,0,0,.45);border:2px solid #fff;overflow:hidden;position:relative}
-.hpFill{height:100%;width:100%;background:linear-gradient(90deg,#ff4d6d,#ffb13b);transition:width .5s;border-radius:10px}
-.hpTxt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;text-shadow:0 1px 2px #000}
-.curseFill{height:100%;width:0;background:linear-gradient(90deg,#8e7cff,#c86bff);border-radius:10px}
-.shake{animation:shake .5s}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px) rotate(-6deg)}40%{transform:translateX(10px) rotate(6deg)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-.casting{animation:cast .8s}
-@keyframes cast{0%{filter:none}50%{filter:drop-shadow(0 0 20px #b06bff) brightness(1.3);transform:scale(1.1)}100%{filter:none}}
-.boardCol{display:flex;flex-direction:column;align-items:center;gap:8px;position:relative}
-.boardFrame{position:relative;border-radius:18px;padding:6px;background:linear-gradient(135deg,#ffd86b,#ff8ad8,#8ab4ff,#7dffb0);box-shadow:0 0 30px rgba(180,140,255,.6);transition:transform .2s,box-shadow .25s}
-.boardFrame.hit{animation:boardHit .35s ease-out}
-@keyframes boardHit{0%{transform:scale(1)}35%{transform:scale(1.02);box-shadow:0 0 40px rgba(255,216,107,.85)}100%{transform:scale(1)}}
-.boardFrame canvas{display:block;border-radius:12px;background:rgba(12,8,40,.88)}
-.spellText{position:absolute;left:50%;top:35%;transform:translate(-50%,-50%);font-size:clamp(22px,3vw,38px);font-weight:bold;white-space:nowrap;pointer-events:none;opacity:0;
-  color:#fff7c2;text-shadow:0 0 10px #ffd86b,0 0 24px #ff9f43,0 3px 0 #6b3fa0;z-index:5}
-.spellText.bad{color:#e6d6ff;text-shadow:0 0 10px #b06bff,0 0 24px #6b2bff,0 3px 0 #2b1650}
-.spellText.go{animation:spell 1.6s ease-out}
-@keyframes spell{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}70%{opacity:1;transform:translate(-50%,-60%) scale(1)}100%{opacity:0;transform:translate(-50%,-90%) scale(.9)}}
-.spellText small{display:block;white-space:nowrap;font-size:.5em;letter-spacing:1px;opacity:.95}
-.spellText.t2{font-size:clamp(26px,3.4vw,44px);color:#d8f3ff;text-shadow:0 0 12px #6fd3ff,0 0 28px #2fa8ff,0 3px 0 #1e3a8a}
-.spellText.t3{font-size:clamp(28px,3.8vw,48px);color:#f2fbff;text-shadow:0 0 14px #fff,0 0 30px #9fe3ff,0 0 50px #6fd3ff,0 3px 0 #2d5bd6}
-.spellText.t4{font-size:clamp(30px,4.2vw,54px);white-space:normal;width:150%;text-align:center;color:#fff;text-shadow:0 0 16px #fff,0 0 34px #ffd86b,0 0 60px #ff8ad8,0 4px 0 #6b3fa0}
-#flashScr{position:fixed;inset:0;z-index:45;pointer-events:none;opacity:0;background:radial-gradient(circle,#ffffff 0%,#cdeeff 40%,rgba(160,210,255,.3) 100%)}
-#flashScr.go{animation:flashScr 1.4s ease-out}
-@keyframes flashScr{0%{opacity:0}12%{opacity:.9}100%{opacity:0}}
-.darkmark{position:fixed;z-index:46;pointer-events:none;filter:drop-shadow(0 0 18px #4be37a) drop-shadow(0 0 40px #2ecc71)}
-.patronus.evil{filter:brightness(0) invert(1) sepia(1) hue-rotate(70deg) saturate(5) drop-shadow(0 0 10px #4be37a) drop-shadow(0 0 30px #a64dff)}
-.dmgPop{position:fixed;z-index:47;font-size:42px;font-weight:bold;pointer-events:none;text-shadow:0 0 8px #fff,0 3px 0 #2b1650}
-#gameWrap{gap:12px!important;align-items:flex-start}
-.sideWrap{display:flex;flex-direction:column;align-items:center;gap:8px}
-.sideRow{display:flex;gap:10px;align-items:flex-start}
-.vsCol{align-self:center;font-size:clamp(20px,2.4vw,32px);font-weight:bold;text-align:center;color:#ffd86b;text-shadow:0 0 14px #ff9f43,0 3px 0 #6b3fa0;line-height:1.1}
-.panel{width:clamp(140px,13vw,190px)!important;padding:8px!important;gap:6px!important}
-.avatarBig{width:clamp(62px,7.2vw,100px)!important;height:clamp(62px,7.2vw,100px)!important}
-.stat{gap:6px;font-size:clamp(13px,1.15vw,16px)!important;padding:3px 8px!important}
-.tag{font-size:13px;background:rgba(255,255,255,.2);border-radius:999px;padding:1px 10px}
-.minis{display:flex;flex-direction:column;gap:6px;width:100%}
-.mini{padding:4px!important;font-size:13px!important}
-.hpFill.good{background:linear-gradient(90deg,#4be37a,#ffd86b)}
-.boardFrame.badf{background:linear-gradient(135deg,#2ecc71,#a64dff,#1a8f4c,#c07bff);box-shadow:0 0 30px rgba(120,255,170,.45)}
-.ghelp{font-size:12px!important}
-#touch{display:none;gap:8px;justify-content:center;flex-wrap:wrap;width:100%;max-width:520px;padding:6px 10px calc(10px + var(--safe-b))}
-body.touch-ui #touch{display:flex}
-@media (hover:none) and (pointer:coarse){#touch{display:flex}}
-body.touch-ui .ghelp.kbd-only{display:none!important}
-@media (hover:none) and (pointer:coarse){.ghelp.kbd-only{display:none!important}}
-.touchHint{font-size:11px;color:#d8ccff;text-align:center;opacity:.85;display:none;width:100%}
-body.touch-ui .touchHint{display:block}
-.swipeZone{touch-action:none}
-@media (max-width:1100px){
- #gameWrap{flex-direction:column;align-items:stretch;flex:1;min-height:0;overflow:hidden;padding-bottom:2px}
- .vsCol{display:none}
- .sideWrap{width:100%;flex:none}
- .sideRow{justify-content:center;width:100%}
-}
-@media (max-width:720px){
- #topBar{padding:6px calc(70px + var(--safe-r)) 4px calc(70px + var(--safe-l));gap:6px;flex-wrap:wrap}
- #topBar .ttl{font-size:clamp(14px,3.6vw,20px);order:3;flex:1 1 100%;text-align:center;margin:0}
- .sideRow{flex-direction:row!important;align-items:flex-start!important;gap:6px}
- .panel{width:clamp(108px,27vw,168px)!important;padding:6px!important}
- .panel .minis,.panel>.mini:last-child{display:none}
- .boardFrame{padding:4px}
- .tbtn{width:52px;height:52px;font-size:21px;border-radius:18px}
- .titleRow .gameLogo{width:clamp(44px,14vw,64px);height:clamp(44px,14vw,64px)}
-}
-@media (max-width:720px) and (orientation:portrait){
- .sideRow{flex-wrap:nowrap}
- .boardCol{flex:1 1 0;min-width:0;max-width:50%}
-}
-@media (max-height:520px) and (orientation:landscape){
- #selScreen{overflow-y:auto;-webkit-overflow-scrolling:touch}
- #topBar{padding:2px calc(64px + var(--safe-r)) 2px calc(64px + var(--safe-l))}
- #topBar .ttl{display:none}
- #gameWrap{overflow:hidden;flex-direction:row;flex-wrap:nowrap;gap:4px;padding:0 4px}
- .sideWrap{flex:1 1 0;min-width:0}
- .sideRow{gap:4px}
- .panel{width:clamp(90px,22vw,130px)!important}
- .panel .avatarBig{width:46px!important;height:46px!important}
- .panel .stat,.panel .hpLabel,.panel .pname{font-size:10px!important}
- .panel .minis,.panel .mini,.panel .ghelp{display:none!important}
- #touch{gap:5px;padding:2px 4px calc(4px + var(--safe-b))}
- .tbtn{width:46px;height:46px;font-size:18px;border-radius:14px}
-}
-.patronus{position:fixed;z-index:46;pointer-events:none;line-height:1;filter:brightness(0) invert(1) drop-shadow(0 0 10px #bfe9ff) drop-shadow(0 0 25px #6fd3ff) drop-shadow(0 0 45px #fff);opacity:.95}
-#pauseMsg{position:absolute;inset:6px;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:rgba(20,10,60,.75);border-radius:12px;font-size:30px;font-weight:bold;z-index:6}
-.tbtn{width:clamp(56px,7vw,78px);height:clamp(56px,7vw,78px);border-radius:22px;border:3px solid rgba(255,255,255,.8);font-size:clamp(24px,3vw,34px);color:#fff;cursor:pointer;
-  background:linear-gradient(180deg,#9b7bff,#5b39d6);box-shadow:0 5px 0 #33208a;font-family:inherit;touch-action:none;display:flex;align-items:center;justify-content:center;flex-direction:column;line-height:1}
-.tbtn small{font-size:11px;margin-top:2px}
-.tbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #33208a}
-.tbtn.drop{background:linear-gradient(180deg,#ffcf4a,#ff8a3d);box-shadow:0 5px 0 #b4501a}
-.tbtn.hold{background:linear-gradient(180deg,#6ff0a5,#22b86b);box-shadow:0 5px 0 #137443}
-.ghelp{font-size:13px;line-height:1.6;text-align:center}
-/* overlays */
-.overlay{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(10,5,40,.6)}
-.overlay.show{display:flex}
-.endCard{background:linear-gradient(180deg,#fff,#efe6ff);color:var(--ink);border-radius:32px;padding:26px 34px;text-align:center;max-width:560px;width:92%;
-  box-shadow:0 0 0 6px #ffd86b,0 0 60px rgba(255,216,107,.7);animation:pop .5s}
-@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
-.endCard h2{font-size:clamp(30px,4vw,46px);margin-bottom:6px}
-.endCard p{font-size:clamp(16px,1.8vw,21px);margin:8px 0 14px}
-.endAv{display:flex;justify-content:center;gap:14px;margin:6px 0}
-.endAv div{width:110px;height:110px}
-.endAv svg{width:100%;height:100%}
-.endBtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px}
-.lose .endCard{box-shadow:0 0 0 6px #9fc3ff,0 0 60px rgba(159,195,255,.6)}
-.defeated{filter:grayscale(.8) opacity(.6);transform:rotate(-12deg)}
-@media (max-width:820px){#gameWrap{gap:6px}}
-</style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <div id="sky">
@@ -274,26 +57,38 @@ body.touch-ui .touchHint{display:block}
     <h1 class="title">✨ Tetris Mágico de Hogwarts ✨</h1>
   </div>
   <div class="subtitle">¡Elige tu mago, tu rival y los colores de tus piezas mágicas!</div>
+  <nav class="selTabs" id="selTabs" aria-label="Elegir héroe o rival">
+    <button type="button" class="active" data-tab="hero">🦁 Héroes</button>
+    <button type="button" data-tab="vill">🐍 Rivales</button>
+  </nav>
+  <div class="themeChips lvlFilter" id="lvlFilter" aria-label="Filtrar por nivel">
+    <button type="button" class="chip sel" data-lv="all">Todos</button>
+    <button type="button" class="chip" data-lv="1">Nv 1</button>
+    <button type="button" class="chip" data-lv="2">Nv 2</button>
+    <button type="button" class="chip" data-lv="3">Nv 3</button>
+    <button type="button" class="chip" data-lv="4">Nv 4</button>
+    <button type="button" class="chip" data-lv="5">Nv 5</button>
+  </div>
   <div id="selWrap">
-    <div class="side good">
+    <div class="side good glass sel-tab-panel" data-panel="hero">
       <h2>🦁 Elige tu personaje</h2><div class="lvTip">Nivel más alto = piezas más rápidas y hechizos más fuertes</div>
       <div class="cards" id="heroCards"></div>
     </div>
-    <div class="center">
+    <div class="center glass">
       <div class="box">
         <h3>🎨 Colores de las piezas</h3>
-        <div class="themes" id="themes"></div>
+        <div class="themeChips themes" id="themes"></div>
       </div>
-      <div id="selDesc"></div><div class="vs" id="vsText">¿Quién contra quién?</div>
-      <button class="btn big" id="playBtn" disabled>🪄 ¡Jugar!</button>
-      <div class="box help">
+      <p id="selDesc"></p><p class="vs" id="vsText">¿Quién contra quién?</p>
+      <button type="button" class="btn big glow play-magic" id="playBtn" disabled>🪄 ¡A jugar!</button>
+      <div class="box help parchment">
         <b>Cómo jugar:</b> completa filas para lanzar hechizos a tu rival: <b>1 fila</b> ✨ básico · <b>2</b> ⚡ fuerte · <b>3</b> 🌟 poderoso · <b>4</b> 💥 ¡SÚPER TETRIS! ¡Bájale toda su magia para ganar!<br>
         <span class="ghelp kbd-only"><kbd>⬅️</kbd><kbd>➡️</kbd> mover · <kbd>⬆️</kbd> girar · <kbd>⬇️</kbd> bajar<br>
         <kbd>Espacio</kbd> caída rápida · <kbd>C</kbd> guardar · <kbd>P</kbd> pausa</span>
         <span class="touchHint">📱 En móvil: botones abajo del tablero · desliza en tu tablero para mover/girar/bajar</span>
       </div>
     </div>
-    <div class="side bad">
+    <div class="side bad glass sel-tab-panel" data-panel="vill">
       <h2>🐍 Elige tu oponente</h2><div class="lvTip">Nivel 1 = muy fácil · Nivel 5 = ¡muy difícil!</div>
       <div class="cards" id="villainCards"></div>
     </div>
@@ -308,10 +103,16 @@ body.touch-ui .touchHint{display:block}
     <div class="ttl">✨ Duelo de Tetris Mágico ✨</div>
     <button class="btn small green" id="pauseBtn">⏸️ Pausa</button>
   </div>
-  <div id="gameWrap">
-    <div class="sideWrap">
+  <div class="duelRoot" id="gameWrap">
+    <nav class="touch-edge left" id="touchL" aria-label="Controles izquierda">
+      <button type="button" class="tbtn" data-a="left" aria-label="Izquierda">⬅️</button>
+      <button type="button" class="tbtn" data-a="rot" aria-label="Girar">🔄</button>
+      <button type="button" class="tbtn hold" data-a="hold" aria-label="Guardar">🎒</button>
+    </nav>
+    <div class="sideWrap player">
+      <div class="phud glass" id="phud" hidden></div>
       <div class="sideRow">
-        <div class="panel good">
+        <div class="panel good glass player-panel">
           <div class="avatarBig" id="pAv"></div>
           <div class="pname" id="pName"></div>
           <div class="tag" id="pTag">🧒 ¡Tú!</div>
@@ -325,21 +126,12 @@ body.touch-ui .touchHint{display:block}
         </div>
         <div class="boardCol swipeZone" id="pSwipe"><div class="boardFrame" id="pFrame"><canvas id="pBoard"></canvas><div class="spellText" id="pSpell"></div></div></div>
       </div>
-      <div id="touch" aria-label="Controles táctiles">
-        <button type="button" class="tbtn" data-a="left" aria-label="Mover izquierda">⬅️</button>
-        <button type="button" class="tbtn" data-a="rot" aria-label="Girar pieza">🔄</button>
-        <button type="button" class="tbtn" data-a="right" aria-label="Mover derecha">➡️</button>
-        <button type="button" class="tbtn" data-a="down" aria-label="Bajar pieza">⬇️</button>
-        <button type="button" class="tbtn drop" data-a="drop" aria-label="Caída rápida">⏬</button>
-        <button type="button" class="tbtn hold" data-a="hold" aria-label="Guardar pieza">🎒</button>
-        <button type="button" class="tbtn" data-a="pause" aria-label="Pausa">⏸️</button>
-      </div>
     </div>
     <div class="vsCol">⚡<br>VS<br>⚡</div>
-    <div class="sideWrap">
-      <div class="sideRow">
-        <div class="boardCol"><div class="boardFrame badf"><canvas id="vBoard"></canvas><div class="spellText" id="vSpell"></div></div></div>
-        <div class="panel bad">
+    <div class="sideWrap rival">
+      <div class="sideRow rival-row">
+        <div class="boardCol rival-mini"><div class="boardFrame badf" id="vFrame"><canvas id="vBoard"></canvas><div class="spellText" id="vSpell"></div></div></div>
+        <div class="panel bad glass rival-panel">
           <div class="avatarBig" id="vAv"></div>
           <div class="pname" id="vName"></div>
           <div class="tag" id="vTag">🤖 Computadora</div>
@@ -348,11 +140,28 @@ body.touch-ui .touchHint{display:block}
           <div class="stat"><span>🏆 Nivel</span><b id="vLevel">1</b></div>
           <div class="stat"><span>📏 Líneas</span><b id="vLines">0</b></div>
           <div class="minis"><div class="mini">🔮 Siguiente<canvas id="vNext" width="90" height="60"></canvas></div></div>
-          <div class="mini" style="font-size:12px">¡Completa filas para lanzarle hechizos!<br>1 ✨ · 2 ⚡ · 3 🌟 · 4 💥</div>
+          <div class="mini spellTip">¡Completa filas para lanzarle hechizos!<br>1 ✨ · 2 ⚡ · 3 🌟 · 4 💥</div>
         </div>
       </div>
     </div>
+    <nav class="touch-edge right" id="touchR" aria-label="Controles derecha">
+      <button type="button" class="tbtn" data-a="right" aria-label="Derecha">➡️</button>
+      <button type="button" class="tbtn" data-a="down" aria-label="Bajar">⬇️</button>
+      <button type="button" class="tbtn drop" data-a="drop" aria-label="Caída rápida">⏬</button>
+      <button type="button" class="tbtn" data-a="pause" aria-label="Pausa">⏸️</button>
+    </nav>
   </div>
+  <footer id="touchDock">
+    <div id="touch" class="touch-dock" aria-label="Controles táctiles">
+      <button type="button" class="tbtn" data-a="left" aria-label="Mover izquierda">⬅️</button>
+      <button type="button" class="tbtn" data-a="rot" aria-label="Girar pieza">🔄</button>
+      <button type="button" class="tbtn" data-a="right" aria-label="Mover derecha">➡️</button>
+      <button type="button" class="tbtn" data-a="down" aria-label="Bajar pieza">⬇️</button>
+      <button type="button" class="tbtn drop" data-a="drop" aria-label="Caída rápida">⏬</button>
+      <button type="button" class="tbtn hold" data-a="hold" aria-label="Guardar pieza">🎒</button>
+      <button type="button" class="tbtn" data-a="pause" aria-label="Pausa">⏸️</button>
+    </div>
+  </footer>
 </section>
 <div class="overlay" id="pauseOv"><div class="endCard"><h2>⏸️ Pausa</h2><p>¡Tómate un respiro, mago!</p><div class="endBtns"><button class="btn green" id="resumeBtn">▶️ Seguir</button></div></div></div>
 <div class="overlay" id="winOv"><div class="endCard">
@@ -370,9 +179,23 @@ body.touch-ui .touchHint{display:block}
 
 <script>
 "use strict";
-/* ================= DISPOSITIVO TÁCTIL ================= */
-function refreshTouchUI(){const coarse=matchMedia('(hover:none) and (pointer:coarse)').matches;const touch=coarse||navigator.maxTouchPoints>0;document.body.classList.toggle('touch-ui',touch);}
-refreshTouchUI();addEventListener('resize',refreshTouchUI);
+/* ================= DISEÑO RESPONSIVE ================= */
+function layoutMode(){const w=innerWidth,h=innerHeight;if(w>=1100)return 'desktop';if(w>=720)return 'tablet';if(h<=w&&h<540)return 'phone-l';return 'phone-p';}
+function setLayout(){const touch=matchMedia('(hover:none) and (pointer:coarse)').matches||navigator.maxTouchPoints>0;
+ document.body.classList.toggle('touch-ui',touch);document.body.dataset.layout=layoutMode();syncSelTabs();if(window.G?.P)fitBoards();}
+function syncSelTabs(){const narrow=innerWidth<720,tab=document.querySelector('#selTabs button.active')?.dataset.tab||'hero';
+ document.querySelectorAll('.sel-tab-panel').forEach(p=>{p.hidden=narrow&&p.dataset.panel!==tab;});}
+document.getElementById('selTabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;
+ document.querySelectorAll('#selTabs button').forEach(x=>x.classList.toggle('active',x===b));syncSelTabs();SFX.select();});
+let filterLv='all';
+document.getElementById('lvlFilter').addEventListener('click',e=>{const b=e.target.closest('[data-lv]');if(!b)return;filterLv=b.dataset.lv;
+ document.querySelectorAll('#lvlFilter .chip').forEach(c=>c.classList.toggle('sel',c===b));
+ document.querySelectorAll('#heroCards .card, #villainCards .card').forEach(card=>{
+  const lv=card.closest('.lvRow')?.className.match(/lv(\d)/)?.[1];card.hidden=filterLv!=='all'&&lv!==filterLv;});
+ document.querySelectorAll('.lvRow').forEach(row=>{const lv=row.className.match(/lv(\d)/)?.[1];
+  const vis=[...row.querySelectorAll('.card')].some(c=>!c.hidden);row.hidden=filterLv!=='all'&&lv!==filterLv||!vis;});
+ SFX.select();});
+addEventListener('resize',setLayout);
 
 /* ================= ESTRELLAS ================= */
 (function(){const sky=document.getElementById('sky');
@@ -603,13 +426,15 @@ function shade(hex,amt){let c=hex.replace('#','');let r=parseInt(c.substr(0,2),1
 function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 function sparkle(ctx,cx,cy,r){ctx.beginPath();ctx.moveTo(cx,cy-r);ctx.quadraticCurveTo(cx,cy,cx+r,cy);ctx.quadraticCurveTo(cx,cy,cx,cy+r);ctx.quadraticCurveTo(cx,cy,cx-r,cy);ctx.quadraticCurveTo(cx,cy,cx,cy-r);ctx.fill();}
 function drawBlock(ctx,x,y,s,color,garb){
- const p=Math.max(1,s*0.06),w=s-2*p,r=s*0.24;x+=p;y+=p;
- const g=ctx.createLinearGradient(x,y,x+w,y+w);g.addColorStop(0,shade(color,.45));g.addColorStop(.5,color);g.addColorStop(1,shade(color,-.3));
+ const p=Math.max(1,s*0.08),w=s-2*p,r=s*0.22;x+=p;y+=p;
+ const g=ctx.createLinearGradient(x,y,x+w,y+w);g.addColorStop(0,shade(color,.55));g.addColorStop(.42,color);g.addColorStop(1,shade(color,-.38));
  ctx.fillStyle=g;rr(ctx,x,y,w,w,r);ctx.fill();
- ctx.lineWidth=Math.max(1,s*0.06);ctx.strokeStyle=shade(color,-.4);ctx.stroke();
- ctx.save();ctx.globalAlpha=.45;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(x+w*.42,y+w*.26,w*.3,w*.13,-0.3,0,Math.PI*2);ctx.fill();ctx.restore();
- ctx.save();ctx.globalAlpha=garb?.35:.75;ctx.fillStyle=garb?'#2b1650':'#fff';
- if(garb){ctx.font=`${s*.5}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('☁',x+w/2,y+w/2+1);}else sparkle(ctx,x+w*.62,y+w*.62,w*.16);
+ ctx.lineWidth=Math.max(1.2,s*0.07);ctx.strokeStyle=shade(color,-.45);ctx.stroke();
+ ctx.save();ctx.globalAlpha=.35;ctx.strokeStyle=shade(color,.35);ctx.lineWidth=Math.max(1,s*.05);
+ ctx.beginPath();ctx.moveTo(x+2,y+2);ctx.lineTo(x+w-2,y+2);ctx.stroke();ctx.restore();
+ ctx.save();ctx.globalAlpha=.5;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(x+w*.4,y+w*.24,w*.32,w*.14,-0.35,0,Math.PI*2);ctx.fill();ctx.restore();
+ ctx.save();ctx.globalAlpha=garb?.35:.8;ctx.fillStyle=garb?'#2b1650':'#fff';
+ if(garb){ctx.font=`${s*.5}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('☁',x+w/2,y+w/2+1);}else sparkle(ctx,x+w*.65,y+w*.62,w*.17);
  ctx.restore();}
 
 /* ================= SONIDO (WebAudio) ================= */
@@ -698,15 +523,15 @@ function centerOf(el){const r=el.getBoundingClientRect();return [r.left+r.width/
 const sel={hero:null,villain:null,theme:'arcoiris'};
 function makeCards(list,boxId,key){const box=document.getElementById(boxId);
  for(let lv=1;lv<=5;lv++){const row=document.createElement('div');row.className='lvRow lv'+lv;row.innerHTML=`<div class="lvLbl">Nivel<b>${lv}</b></div><div class="lvCards"></div>`;box.appendChild(row);}
- list.slice().sort((a,b)=>a.lv-b.lv).forEach(ch=>{const b=document.createElement('button');b.className='card';b.dataset.id=ch.id;b.title=ch.n+' — '+ch.d+' (Nivel '+ch.lv+')';
-  b.innerHTML=AV[ch.id]()+`<div class="nm">${ch.n}</div><div class="stars">${STARS(ch.lv)}</div><div class="ds">${ch.d}</div>`;
+ list.slice().sort((a,b)=>a.lv-b.lv).forEach(ch=>{const b=document.createElement('button');b.className='card';b.dataset.id=ch.id;b.dataset.lv=ch.lv;b.title=ch.n+' — '+ch.d+' (Nivel '+ch.lv+')';
+  b.innerHTML=`<span class="lvBadge">Nv ${ch.lv}</span>`+AV[ch.id]()+`<div class="nm">${ch.n}</div><div class="stars">${STARS(ch.lv)}</div><div class="ds">${ch.d}</div>`;
   b.onclick=()=>{sel[key]=ch.id;box.querySelectorAll('.card').forEach(c=>c.classList.toggle('sel',c===b));SFX.select();
    const [x,y]=centerOf(b);burst(x,y,24,key==='hero'?['#ffd86b','#fff','#ff9f43']:['#7dffb0','#c9b6ff','#fff']);updateSel();
    document.getElementById('selDesc').textContent=(key==='hero'?'🦁 ':'🐍 ')+ch.n+': '+ch.d+' · Nivel '+ch.lv;};
   box.querySelector('.lv'+ch.lv+' .lvCards').appendChild(b);});}
 makeCards(HEROES,'heroCards','hero');makeCards(VILLAINS,'villainCards','villain');
 const themesBox=document.getElementById('themes');
-THEMES.forEach(t=>{const b=document.createElement('button');b.className='theme'+(t.id===sel.theme?' sel':'');
+THEMES.forEach(t=>{const b=document.createElement('button');b.className='theme chip'+(t.id===sel.theme?' sel':'');
  const cv=document.createElement('canvas');cv.width=110;cv.height=24;const c=cv.getContext('2d');for(let i=0;i<5;i++)drawBlock(c,i*22,0,22,t.c[i]);
  b.innerHTML=`<span>${t.e} ${t.n}</span>`;b.appendChild(cv);
  b.onclick=()=>{sel.theme=t.id;themesBox.querySelectorAll('.theme').forEach(x=>x.classList.toggle('sel',x===b));SFX.select();const [x,y]=centerOf(b);burst(x,y,16,t.c);};
@@ -768,20 +593,18 @@ function collide(B,m,px,py){for(let y=0;y<m.length;y++)for(let x=0;x<m[y].length
  if(nx<0||nx>=COLS||ny>=ROWS)return true;if(ny>=0&&B.grid[ny][nx])return true;}return false;}
 function theme(){return THEMES.find(t=>t.id===sel.theme).c;}
 function colorOf(B,t){return t==='G'?GARBAGE:(B.side==='p'?theme():VPAL)[TYPES.indexOf(t)];}
-function fitBoards(){const vv=window.visualViewport;const vh=(vv?vv.height:innerHeight),vw=(vv?vv.width:innerWidth);
- const tb=document.getElementById('topBar').offsetHeight||48;
- const touchEl=document.getElementById('touch');
- const tc=(touchEl&&getComputedStyle(touchEl).display!=='none')?touchEl.offsetHeight:12;
- const panel=document.querySelector('#gameScreen .panel');
- const pw=panel?panel.offsetWidth||140:140;
- const portrait=vh>vw;const ph=portrait&&panel?(panel.offsetHeight||120)+8:0;
- const pad=24;
- let avH=vh-tb-tc-pad-ph,avW;
- if(portrait&&vw<720){avW=(vw-pw*2-28)/2;}else if(!portrait&&vh<520){avW=(vw-2*pw-32)/2;}else{avW=(vw-2*pw-80)/2;}
- avH=Math.max(avH,vh*.38);avW=Math.max(avW,vw*.22);
- CELL=Math.max(12,Math.min(34,Math.floor(Math.min(avH/ROWS,avW/COLS))));
+function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const vv=window.visualViewport;
+ const vh=(vv?vv.height:innerHeight),vw=(vv?vv.width:innerWidth);const tb=document.getElementById('topBar').offsetHeight||48;
+ const dock=document.getElementById('touchDock');const tc=(dock&&getComputedStyle(dock).display!=='none'&&dock.offsetHeight)?dock.offsetHeight:0;
+ let avH,avW,cellMin=11,cellMax=34;
+ if(mode==='phone-p'){const rival=Math.min(118,vh*.16);const hud=76;avH=vh-tb-tc-rival-hud-14;avW=vw-28;cellMin=14;cellMax=32;}
+ else if(mode==='phone-l'){avH=vh-tb-12;avW=(vw-150)/2;cellMin=10;cellMax=26;}
+ else if(mode==='tablet'){const pw=200;avH=vh-tb-tc-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
+ else{const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||200;avH=vh-tb-24;avW=(vw-2*pw-100)/2;cellMin=14;cellMax=34;}
+ avH=Math.max(avH,vh*(mode==='phone-p'?0.42:0.35));avW=Math.max(avW,vw*(mode==='phone-p'?0.88:0.2));
+ CELL=Math.max(cellMin,Math.min(cellMax,Math.floor(Math.min(avH/ROWS,avW/COLS))));
  for(const B of [Game.P,Game.V])if(B){B.cv.width=CELL*COLS;B.cv.height=CELL*ROWS;}}
-function onViewportChange(){fitFx();if(Game.P)fitBoards();}
+function onViewportChange(){fitFx();setLayout();}
 addEventListener('resize',onViewportChange);addEventListener('orientationchange',()=>setTimeout(onViewportChange,120));
 if(window.visualViewport){visualViewport.addEventListener('resize',onViewportChange);visualViewport.addEventListener('scroll',onViewportChange);}
 
@@ -795,7 +618,7 @@ function startGame(){
  V.dmgMult=VILL_CFG.dmg[v.lv];V.gravBase=VILL_CFG.grav[v.lv];V.cfg={wait:VILL_CFG.wait[v.lv],move:VILL_CFG.move[v.lv],drop:VILL_CFG.drop[v.lv],mis:VILL_CFG.mis[v.lv],range:VILL_CFG.range[v.lv]};
  if(window.TEST_AUTOPLAY){P.autoplay=true;P.cfg=window.TEST_AUTOPLAY;}
  document.getElementById('pTag').textContent='🧒 ¡Tú! · '+STARS(h.lv);document.getElementById('vTag').textContent='🤖 '+STARS(v.lv);
- fitBoards();
+ setLayout();
  for(const B of [Game.P,Game.V]){B.next=nextType(B);spawn(B);updateHUD(B);}
  Game.V.ai.wait=2500;
  showSpell(Game.P,'¡A jugar, '+h.n.split(' ')[0]+'!');showSpell(Game.V,'¡Prepárate!',true);}
@@ -833,6 +656,7 @@ function clearLines(B,full){const n=full.length;B.flash=full.slice();B.flashT=25
  const oldLvl=B.level;B.lines+=n;B.score+=[0,100,300,500,800][n]*B.level;B.level=1+Math.floor(B.lines/8);
  const r=B.cv.getBoundingClientRect();
  const frame=B.cv.closest('.boardFrame');if(frame){frame.classList.remove('hit');void frame.offsetWidth;frame.classList.add('hit');setTimeout(()=>frame.classList.remove('hit'),400);}
+ if(isP(B)){const gs=document.getElementById('gameScreen');gs.classList.remove('screenShake');void gs.offsetWidth;gs.classList.add('screenShake');setTimeout(()=>gs.classList.remove('screenShake'),420);}
  full.forEach(y=>{const yy=r.top+(y+.5)*(r.height/ROWS);for(let k=0;k<6;k++)burst(r.left+r.width*k/5,yy,2+n*2,isP(B)?theme().concat(['#fff']):VCOL,{speed:2+n,size:3+n*1.5});});
  cast(B,n);
  if(B.level>oldLvl)setTimeout(()=>{if(!Game.over){showSpell(B,'🏆 ¡Nivel '+B.level+'!',!isP(B));if(isP(B))SFX.level();}},1600);
@@ -859,7 +683,8 @@ function popDmg(x,y,t,c){const d=document.createElement('div');d.className='dmgP
 function showSpell(B,t,bad,lbl,cls,c){const e=$s(B,'Spell');e.innerHTML=(lbl?`<small>${lbl}</small>`:'')+t;e.className='spellText '+(bad?'bad ':'')+(cls||'');
  e.style.textShadow=c?`0 0 12px ${c},0 0 30px ${c},0 0 50px ${c},0 3px 0 #2b1650`:'';void e.offsetWidth;e.classList.add('go');}
 function updateHUD(B){$s(B,'Score').textContent=B.score;$s(B,'Level').textContent=B.level;$s(B,'Lines').textContent=B.lines;
- $s(B,'HpFill').style.width=(B.hp/B.hpMax*100)+'%';$s(B,'HpTxt').textContent=B.hp+' / '+B.hpMax;}
+ const fill=$s(B,'HpFill');const pct=(B.hp/B.hpMax*100)+'%';if(fill.style.width!==pct){fill.classList.remove('hp-pulse');void fill.offsetWidth;fill.classList.add('hp-pulse');}
+ fill.style.width=pct;$s(B,'HpTxt').textContent=B.hp+' / '+B.hpMax;}
 function drawMini(cv,t,B){if(!cv)return;const c=cv.getContext('2d');c.clearRect(0,0,cv.width,cv.height);if(!t)return;const m=SHAPES[t];const s=18;
  let minx=9,maxx=-1,miny=9,maxy=-1;m.forEach((r,y)=>r.forEach((v,x)=>{if(v){minx=Math.min(minx,x);maxx=Math.max(maxx,x);miny=Math.min(miny,y);maxy=Math.max(maxy,y);}}));
  const ox=(cv.width-(maxx-minx+1)*s)/2-minx*s,oy=(cv.height-(maxy-miny+1)*s)/2-miny*s;
@@ -925,7 +750,7 @@ addEventListener('keydown',e=>{if(!document.getElementById('gameScreen').classLi
   z:()=>rotate(P,-1),Z:()=>rotate(P,-1),x:()=>rotate(P,1),X:()=>rotate(P,1),c:()=>doHold(P),C:()=>doHold(P),Shift:()=>doHold(P),p:togglePause,P:togglePause,Escape:togglePause};
  if(map[e.key]){e.preventDefault();ac();map[e.key]();}});
 const ACT={left:()=>move(Game.P,-1),right:()=>move(Game.P,1),down:()=>softDrop(Game.P),rot:()=>rotate(Game.P,1),drop:()=>hardDrop(Game.P),hold:()=>doHold(Game.P),pause:togglePause};
-document.querySelectorAll('.tbtn').forEach(b=>{let t1,t2;const a=b.dataset.a,rep=['left','right','down'].includes(a);
+ document.querySelectorAll('.tbtn, .touch-edge .tbtn').forEach(b=>{let t1,t2;const a=b.dataset.a,rep=['left','right','down'].includes(a);
  const stop=()=>{clearTimeout(t1);clearInterval(t2);};
  b.addEventListener('pointerdown',e=>{e.preventDefault();ac();ACT[a]();if(rep){t1=setTimeout(()=>{t2=setInterval(ACT[a],70)},220);}});
  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));});
@@ -942,6 +767,7 @@ let last=performance.now();
 function loop(now){const dt=Math.min(100,now-last);last=now;
  if(Game.P){for(let k=0;k<(window.SIM_SPEED||1);k++){update(Game.P,dt);update(Game.V,dt);}drawBoard(Game.P,now);drawBoard(Game.V,now);}drawParts();requestAnimationFrame(loop);}
 requestAnimationFrame(loop);
+setLayout();
 </script>
 </body>
 </html>
