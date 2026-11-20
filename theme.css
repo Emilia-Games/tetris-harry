@@ -826,16 +826,31 @@ body[data-layout="phone-p"] #topBar .btn.small {
   padding: 7px 9px;
   white-space: nowrap;
 }
+body[data-layout="phone-p"]:has(#gameScreen.show) #topBar {
+  padding-right: calc(88px + var(--safe-r));
+}
 body[data-layout="phone-p"]:has(#gameScreen.show) #muteBtn,
 body[data-layout="phone-p"]:has(#gameScreen.show) #musicBtn {
-  top: calc(54px + var(--safe-t));
-  width: 38px;
-  height: 38px;
-  font-size: 1rem;
-  z-index: 55;
+  top: calc(6px + var(--safe-t));
+  width: 32px;
+  height: 32px;
+  font-size: 0.85rem;
+  z-index: 70;
+  border-width: 2px;
 }
 body[data-layout="phone-p"]:has(#gameScreen.show) #muteBtn { right: calc(10px + var(--safe-r)); }
-body[data-layout="phone-p"]:has(#gameScreen.show) #musicBtn { right: calc(54px + var(--safe-r)); font-size: 0.95rem; }
+body[data-layout="phone-p"]:has(#gameScreen.show) #musicBtn { right: calc(46px + var(--safe-r)); }
+body[data-layout="phone-l"]:has(#gameScreen.show) #muteBtn,
+body[data-layout="phone-l"]:has(#gameScreen.show) #musicBtn {
+  top: calc(6px + var(--safe-t));
+  width: 32px;
+  height: 32px;
+  font-size: 0.85rem;
+  z-index: 70;
+  border-width: 2px;
+}
+body[data-layout="phone-l"]:has(#gameScreen.show) #musicBtn { right: calc(46px + var(--safe-r)); }
+body[data-layout="phone-l"]:has(#gameScreen.show) #muteBtn { right: calc(10px + var(--safe-r)); }
 
 body[data-layout="phone-p"] #gameScreen #gameWrap {
   display: flex !important;
@@ -1112,9 +1127,72 @@ body[data-layout="phone-l"] .sideWrap.player { grid-area: player; }
 body[data-layout="phone-l"] .vsCol { grid-area: vs; display: block !important; font-size: 0.85rem; }
 body[data-layout="phone-l"] .sideWrap.rival { grid-area: rival; }
 body[data-layout="phone-l"] .touch-edge.right { grid-area: touchR; }
-body[data-layout="phone-l"] .sideWrap .panel { display: none !important; }
-body[data-layout="phone-l"] .sideWrap .sideRow { flex-direction: column; align-items: center; }
 body[data-layout="phone-l"] #gameScreen #touchDock { display: none !important; }
+body[data-layout="phone-l"] #gameScreen #gameWrap {
+  align-items: center;
+  align-self: center;
+  max-height: calc(100dvh - 50px);
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+body[data-layout="phone-l"] .sideWrap .sideRow {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  gap: 2px;
+}
+body[data-layout="phone-l"] .sideWrap .panel {
+  display: flex !important;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  padding: 2px 4px !important;
+  gap: 0 !important;
+  border: none !important;
+  background: rgba(8, 6, 28, 0.55) !important;
+  border-radius: var(--radius-sm) !important;
+  box-sizing: border-box;
+}
+body[data-layout="phone-l"] .sideWrap .panel > *:not(.hpWrap) {
+  display: none !important;
+}
+body[data-layout="phone-l"] .sideWrap .panel .hpLabel {
+  font-size: 0.52rem;
+  margin-bottom: 0;
+  line-height: 1;
+}
+body[data-layout="phone-l"] .sideWrap .panel .hpBar {
+  height: 11px;
+}
+body[data-layout="phone-l"] .sideWrap .panel .hpTxt {
+  font-size: 0.55rem;
+}
+body[data-layout="phone-l"] .sideWrap.rival .sideRow .rival-panel {
+  order: -1;
+}
+body[data-layout="phone-l"] .sideWrap.rival .rival-mini {
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+body[data-layout="phone-l"] .boardStage > .mini.flank {
+  display: none !important;
+}
+body[data-layout="phone-l"] .boardStage {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+body[data-layout="phone-l"] .sideWrap .boardCol {
+  width: 100%;
+  justify-content: center;
+}
+body[data-layout="phone-l"] .sideWrap .boardFrame {
+  max-width: min(100%, 320px);
+}
 
 .glass.side::before {
   content: "";

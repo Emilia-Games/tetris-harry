@@ -618,10 +618,18 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
    const anchoLibre=Math.max(0,Math.min(stageW,vw-16)-flank);
    avH=altoLibre;avW=anchoLibre;
   }else{avH=vh-tb-tc-(short?150:165);avW=vw-24;}
- }else if(mode==='phone-l'){avH=vh-tb-12;avW=(vw-150)/2;cellMin=10;cellMax=26;}
- else if(mode==='tablet'){const pw=200;avH=vh-tb-tc-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
+ }else if(mode==='phone-l'){
+  const margin=14;
+  const inGame=document.getElementById('gameScreen')?.classList.contains('show');
+  const hpH=inGame?(document.querySelector('.sideWrap.player .player-panel')?.offsetHeight||24):24;
+  avH=vh-tb-margin-hpH;cellMin=8;cellMax=Math.max(8,Math.floor(avH/ROWS));
+  const touch=document.querySelectorAll('#gameWrap .touch-edge');
+  let touchW=112;touch.forEach(el=>{touchW+=el.getBoundingClientRect().width||52;});
+  const vsW=36;avW=(vw-touchW-vsW-12)/2;
+ }else if(mode==='tablet'){const pw=200;avH=vh-tb-tc-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
  else{const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||200;avH=vh-tb-24;avW=(vw-2*pw-100)/2;cellMin=14;cellMax=34;}
- if(mode!=='phone-p'){avH=Math.max(avH,vh*.35);avW=Math.max(avW,vw*.2);}
+ if(mode==='desktop'||mode==='tablet'){avH=Math.max(avH,vh*.35);avW=Math.max(avW,vw*.2);}
+ else if(mode==='phone-l'){avH=Math.max(0,avH);avW=Math.max(avW,60);}
  else avH=Math.max(0,avH);
  let pCell=Math.max(cellMin,Math.min(cellMax,Math.floor(Math.min(avH/ROWS,avW/COLS))));
  if(mode==='phone-p'&&Game.P?.cv){
@@ -638,7 +646,18 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
   if(mode==='phone-p'){const vCell=Math.max(7,Math.min(10,Math.floor(84/COLS)));
    if(Game.P?.cv){Game.P.cv.width=pCell*COLS;Game.P.cv.height=pCell*ROWS;}
    if(Game.V?.cv){Game.V.cv.width=vCell*COLS;Game.V.cv.height=vCell*ROWS;}
-  }else for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}}}
+  }else{
+   for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
+   if(mode==='phone-l'&&Game.P?.cv&&innerHeight<500){
+    const limit=innerHeight-6;
+    while(pCell>8){
+     const fb=Game.P.cv.closest('.boardFrame')?.getBoundingClientRect().bottom||0;
+     if(fb<=limit)break;pCell--;
+     for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
+    }
+    CELL=pCell;
+   }
+  }}}
 window.fitBoards=fitBoards;
 function onViewportChange(){fitFx();setLayout();}
 addEventListener('resize',onViewportChange);addEventListener('orientationchange',()=>setTimeout(onViewportChange,120));

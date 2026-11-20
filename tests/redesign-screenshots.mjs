@@ -87,6 +87,17 @@ function assertLayout(page, name, phase, minCell) {
           issues.push(`${label}: celda ${cell.toFixed(1)}px < mínimo ${minC}px`);
         }
       }
+      if (label.endsWith('-duel') && document.body.dataset.layout === 'phone-l') {
+        const vh = window.innerHeight;
+        for (const id of ['pFrame', 'vFrame']) {
+          const fr = document.getElementById(id);
+          if (!fr) continue;
+          const b = fr.getBoundingClientRect().bottom;
+          if (b > vh + 1) {
+            issues.push(`${label}: ${id} bottom ${b.toFixed(1)} > innerHeight ${vh}`);
+          }
+        }
+      }
       return { issues, cell };
     },
     { label: `${name}-${phase}`, minCell }
