@@ -32,9 +32,10 @@ jobs:
 
       - name: Preparar solo archivos del juego
         run: |
-          mkdir -p deploy/screenshots
-          cp index.html deploy/
+          mkdir -p deploy/screenshots deploy/icons
+          cp index.html manifest.webmanifest deploy/
           cp screenshots/* deploy/screenshots/
+          cp icons/* deploy/icons/
 
       - name: Subir por FTP/FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
