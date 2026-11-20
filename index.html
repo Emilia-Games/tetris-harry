@@ -184,8 +184,15 @@
 <script>
 "use strict";
 /* ================= DISEÑO RESPONSIVE ================= */
-function layoutMode(){const w=innerWidth,h=innerHeight;if(w>=1100)return 'desktop';if(h<=w&&h<540)return 'phone-l';if(w<720||w<920&&h>w)return 'phone-p';if(w>=720)return 'tablet';return 'phone-p';}
-function setLayout(){const touch=matchMedia('(hover:none) and (pointer:coarse)').matches||navigator.maxTouchPoints>0;
+function isCoarseTouch(){return matchMedia('(hover:none) and (pointer:coarse)').matches||navigator.maxTouchPoints>0;}
+function layoutMode(){const w=innerWidth,h=innerHeight,touch=isCoarseTouch();
+ if(h<=w&&h<540)return 'phone-l';
+ if(touch&&w>h&&w<1400)return 'touch-l';
+ if(w>=1100&&!touch)return 'desktop';
+ if(w<720||w<920&&h>w)return 'phone-p';
+ if(w>=720)return 'tablet';
+ return 'phone-p';}
+function setLayout(){const touch=isCoarseTouch();
  document.body.classList.toggle('touch-ui',touch);document.body.dataset.layout=layoutMode();syncSelTabs();if(window.G?.P)fitBoards();}
 function syncSelTabs(){const narrow=innerWidth<720,tab=document.querySelector('#selTabs button.active')?.dataset.tab||'hero';
  document.querySelectorAll('.sel-tab-panel').forEach(p=>{p.hidden=narrow&&p.dataset.panel!==tab;});}
@@ -626,10 +633,16 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
   const touch=document.querySelectorAll('#gameWrap .touch-edge');
   let touchW=112;touch.forEach(el=>{touchW+=el.getBoundingClientRect().width||52;});
   const vsW=36;avW=(vw-touchW-vsW-12)/2;
- }else if(mode==='tablet'){const pw=200;avH=vh-tb-tc-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
+ }else if(mode==='touch-l'){
+  const margin=10;
+  avH=vh-tb-margin;cellMin=10;cellMax=Math.floor(avH/ROWS);
+  let touchW=24;document.querySelectorAll('#gameWrap .touch-edge').forEach(el=>{touchW+=el.getBoundingClientRect().width||56;});
+  const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||Math.max(150,Math.min(200,vw*.14));
+  avW=(vw-touchW-48-2*pw)/2;
+ }else if(mode==='tablet'){const pw=200;avH=vh-tb-(dockOn?tc:0)-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
  else{const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||200;avH=vh-tb-24;avW=(vw-2*pw-100)/2;cellMin=14;cellMax=34;}
  if(mode==='desktop'||mode==='tablet'){avH=Math.max(avH,vh*.35);avW=Math.max(avW,vw*.2);}
- else if(mode==='phone-l'){avH=Math.max(0,avH);avW=Math.max(avW,60);}
+ else if(mode==='phone-l'||mode==='touch-l'){avH=Math.max(0,avH);avW=Math.max(avW,60);}
  else avH=Math.max(0,avH);
  let pCell=Math.max(cellMin,Math.min(cellMax,Math.floor(Math.min(avH/ROWS,avW/COLS))));
  if(mode==='phone-p'&&Game.P?.cv){
@@ -648,11 +661,15 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
    if(Game.V?.cv){Game.V.cv.width=vCell*COLS;Game.V.cv.height=vCell*ROWS;}
   }else{
    for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
-   if(mode==='phone-l'&&Game.P?.cv&&innerHeight<500){
-    const limit=innerHeight-6;
+   if((mode==='phone-l'||mode==='touch-l')&&Game.P?.cv){
+    const limit=vh-4;
     while(pCell>8){
-     const fb=Game.P.cv.closest('.boardFrame')?.getBoundingClientRect().bottom||0;
-     if(fb<=limit)break;pCell--;
+     let ok=true;
+     for(const id of ['pFrame','vFrame']){
+      const fb=document.getElementById(id)?.getBoundingClientRect().bottom||0;
+      if(fb>limit){ok=false;break;}
+     }
+     if(ok)break;pCell--;
      for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
     }
     CELL=pCell;
