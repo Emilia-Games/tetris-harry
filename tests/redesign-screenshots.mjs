@@ -106,30 +106,37 @@ function assertLayout(page, name, phase, minCell) {
             }
           }
         }
-        if (layout === 'touch-l') {
-          const pCv = document.getElementById('pBoard');
-          const vCv = document.getElementById('vBoard');
-          if (pCv && vCv) {
-            const pr = pCv.getBoundingClientRect();
-            const vr = vCv.getBoundingClientRect();
-            const cellP = pr.height / 20;
-            const cellV = vr.height / 20;
-            if (Math.abs(cellP - cellV) > 0.55) {
+        if (['touch-l', 'phone-l', 'desktop', 'tablet'].includes(layout)) {
+          const pFr = document.getElementById('pFrame')?.getBoundingClientRect();
+          const vFr = document.getElementById('vFrame')?.getBoundingClientRect();
+          if (pFr && vFr) {
+            const d = (a, b) => Math.abs(a - b);
+            if (d(pFr.top, vFr.top) > 1) {
               issues.push(
-                `${label}: celdas distintas jugador ${cellP.toFixed(2)}px vs rival ${cellV.toFixed(2)}px`
+                `${label}: pFrame/vFrame top Δ=${d(pFr.top, vFr.top).toFixed(2)} (${pFr.top.toFixed(1)} vs ${vFr.top.toFixed(1)})`
               );
             }
-            if (Math.abs(pr.width - vr.width) > 1.5) {
+            if (d(pFr.bottom, vFr.bottom) > 1) {
               issues.push(
-                `${label}: ancho canvas jugador ${pr.width.toFixed(1)} ≠ rival ${vr.width.toFixed(1)}`
+                `${label}: pFrame/vFrame bottom Δ=${d(pFr.bottom, vFr.bottom).toFixed(2)}`
+              );
+            }
+            if (d(pFr.width, vFr.width) > 1) {
+              issues.push(
+                `${label}: pFrame/vFrame width Δ=${d(pFr.width, vFr.width).toFixed(2)}`
+              );
+            }
+            if (d(pFr.height, vFr.height) > 1) {
+              issues.push(
+                `${label}: pFrame/vFrame height Δ=${d(pFr.height, vFr.height).toFixed(2)}`
               );
             }
           }
-          const pFr = document.getElementById('pFrame')?.getBoundingClientRect();
-          const vFr = document.getElementById('vFrame')?.getBoundingClientRect();
-          if (pFr && vFr && Math.abs(pFr.top - vFr.top) > 2) {
+          const pp = document.querySelector('.player-panel')?.getBoundingClientRect();
+          const vp = document.querySelector('.rival-panel')?.getBoundingClientRect();
+          if (pp && vp && Math.abs(pp.top - vp.top) > 1) {
             issues.push(
-              `${label}: tops desalineados pFrame ${pFr.top.toFixed(1)} vs vFrame ${vFr.top.toFixed(1)}`
+              `${label}: paneles top Δ=${Math.abs(pp.top - vp.top).toFixed(2)}`
             );
           }
         }
@@ -190,13 +197,30 @@ for (const s of sizes) {
   const duel = await assertLayout(page, s.name, 'duel', s.minCell);
   errors.push(...duel.issues);
   if (duel.cell != null) {
-    cellReport.push({
+    const layout = await page.evaluate(() => document.body.dataset.layout);
+    const row = {
       viewport: s.name,
-      layout: await page.evaluate(() => document.body.dataset.layout),
+      layout,
       cellPx: Math.round(duel.cell * 10) / 10,
       boardW: Math.round(duel.cell * 10),
       boardH: Math.round(duel.cell * 20),
-    });
+    };
+    if (['touch-l', 'phone-l', 'desktop', 'tablet'].includes(layout)) {
+      row.frames = await page.evaluate(() => {
+        const r = (id) => {
+          const fr = document.getElementById(id)?.getBoundingClientRect();
+          if (!fr) return null;
+          return {
+            top: +fr.top.toFixed(2),
+            bottom: +fr.bottom.toFixed(2),
+            width: +fr.width.toFixed(2),
+            height: +fr.height.toFixed(2),
+          };
+        };
+        return { pFrame: r('pFrame'), vFrame: r('vFrame') };
+      });
+    }
+    cellReport.push(row);
   }
   await page.screenshot({ path: join(outDir, `${s.name}-duel.png`) });
   if (s.touch) {
@@ -214,9 +238,14 @@ const n = sizes.length * 2;
 console.log('Saved to', outDir);
 console.log('\nTamaño de celda (duelo):');
 for (const r of cellReport) {
-  console.log(
-    `  ${r.viewport} [${r.layout}]: ${r.cellPx}px/celda (tablero ~${r.boardW}×${r.boardH}px)`
-  );
+  let line = `  ${r.viewport} [${r.layout}]: ${r.cellPx}px/celda (tablero ~${r.boardW}×${r.boardH}px)`;
+  if (r.frames?.pFrame && r.frames?.vFrame) {
+    const p = r.frames.pFrame;
+    const v = r.frames.vFrame;
+    line += `\n    pFrame t=${p.top} b=${p.bottom} ${p.width}×${p.height}`;
+    line += `\n    vFrame t=${v.top} b=${v.bottom} ${v.width}×${v.height}`;
+  }
+  console.log(line);
 }
 if (flat.length) {
   console.error(flat.join('\n'));

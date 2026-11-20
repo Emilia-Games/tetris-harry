@@ -621,6 +621,28 @@ function collide(B,m,px,py){for(let y=0;y<m.length;y++)for(let x=0;x<m[y].length
 function theme(){return THEMES.find(t=>t.id===sel.theme).c;}
 function colorOf(B,t){return t==='G'?GARBAGE:(B.side==='p'?theme():VPAL)[TYPES.indexOf(t)];}
 const FRAME_PAD=12;
+const DUEL_FRAME_LAYOUTS=new Set(['touch-l','phone-l','desktop','tablet']);
+function syncBoardFrames(){
+ const mode=document.body.dataset.layout||layoutMode();
+ if(!DUEL_FRAME_LAYOUTS.has(mode))return;
+ if(!document.getElementById('gameScreen')?.classList.contains('show'))return;
+ const pCol=document.querySelector('.sideWrap.player .boardCol, #pSwipe');
+ const vCol=document.querySelector('.sideWrap.rival .rival-mini, .sideWrap.rival .boardCol');
+ const pFrame=document.getElementById('pFrame'),vFrame=document.getElementById('vFrame');
+ const pPanel=document.querySelector('.sideWrap.player .player-panel');
+ const vPanel=document.querySelector('.sideWrap.rival .rival-panel');
+ if(pCol)pCol.style.marginTop='';
+ if(vCol)vCol.style.marginTop='';
+ if(pPanel)pPanel.style.marginTop='';
+ if(vPanel)vPanel.style.marginTop='';
+ if(!pCol||!vCol||!pFrame||!vFrame)return;
+ if(pPanel&&vPanel){
+  const dp=vPanel.getBoundingClientRect().top-pPanel.getBoundingClientRect().top;
+  if(Math.abs(dp)>0.5){if(dp>0)pPanel.style.marginTop=`${dp}px`;else vPanel.style.marginTop=`${-dp}px`;}
+ }
+ const dTop=vFrame.getBoundingClientRect().top-pFrame.getBoundingClientRect().top;
+ if(Math.abs(dTop)>0.5){if(dTop>0)pCol.style.marginTop=`${dTop}px`;else vCol.style.marginTop=`${-dTop}px`;}
+}
 function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const vv=window.visualViewport;
  const vh=(vv?vv.height:innerHeight),vw=(vv?vv.width:innerWidth);const tb=document.getElementById('topBar').offsetHeight||48;
  const dock=document.getElementById('touchDock');const dockOn=dock&&getComputedStyle(dock).display!=='none';
@@ -655,7 +677,11 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
   const aside=document.querySelector('.sideWrap.player .playerAside');
   const pwP=aside?.getBoundingClientRect().width||document.querySelector('.sideWrap.player .panel')?.offsetWidth||175;
   const pwV=document.querySelector('.sideWrap.rival .panel')?.getBoundingClientRect().width||pwP;
-  avW=(vw-48-32-pwP-pwV)/2;
+  let slotW=(vw-48-32-pwP-pwV)/2;
+  const colP=document.querySelector('.sideWrap.player .boardCol, #pSwipe');
+  const colV=document.querySelector('.sideWrap.rival .rival-mini');
+  if(colP?.clientWidth&&colV?.clientWidth)slotW=Math.min(colP.clientWidth,colV.clientWidth,slotW);
+  avW=slotW;
  }else if(mode==='tablet'){const pw=200;avH=vh-tb-(dockOn?tc:0)-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
  else{const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||200;avH=vh-tb-24;avW=(vw-2*pw-100)/2;cellMin=14;cellMax=34;}
  if(mode==='desktop'||mode==='tablet'){avH=Math.max(avH,vh*.35);avW=Math.max(avW,vw*.2);}
@@ -703,7 +729,8 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
     }
     CELL=pCell;
    }
-  }}}
+  }}
+ syncBoardFrames();}
 window.fitBoards=fitBoards;
 function onViewportChange(){fitFx();setLayout();}
 addEventListener('resize',onViewportChange);addEventListener('orientationchange',()=>setTimeout(onViewportChange,120));
