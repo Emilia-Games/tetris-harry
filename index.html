@@ -593,22 +593,44 @@ function collide(B,m,px,py){for(let y=0;y<m.length;y++)for(let x=0;x<m[y].length
  if(nx<0||nx>=COLS||ny>=ROWS)return true;if(ny>=0&&B.grid[ny][nx])return true;}return false;}
 function theme(){return THEMES.find(t=>t.id===sel.theme).c;}
 function colorOf(B,t){return t==='G'?GARBAGE:(B.side==='p'?theme():VPAL)[TYPES.indexOf(t)];}
+const FRAME_PAD=12;
 function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const vv=window.visualViewport;
  const vh=(vv?vv.height:innerHeight),vw=(vv?vv.width:innerWidth);const tb=document.getElementById('topBar').offsetHeight||48;
- const dock=document.getElementById('touchDock');const tc=(dock&&getComputedStyle(dock).display!=='none'&&dock.offsetHeight)?dock.offsetHeight:0;
+ const dock=document.getElementById('touchDock');const dockOn=dock&&getComputedStyle(dock).display!=='none';
+ const tc=dockOn?dock.offsetHeight:0;const dockTop=dockOn?dock.getBoundingClientRect().top:vh;
  let avH,avW,cellMin=11,cellMax=34;
- if(mode==='phone-p'){const short=vh<720;const rival=short?94:112;const hud=short?90:102;avH=vh-tb-tc-rival-hud-16;avW=vw-16;cellMin=12;cellMax=short?26:34;}
- else if(mode==='phone-l'){avH=vh-tb-12;avW=(vw-150)/2;cellMin=10;cellMax=26;}
+ if(mode==='phone-p'){
+  const short=vh<720;
+  const inGame=document.getElementById('gameScreen')?.classList.contains('show');
+  const arena=document.getElementById('gameWrap');
+  const arenaH=arena?.getBoundingClientRect().height||(vh-tb-tc);
+  const rivalH=inGame?(document.querySelector('.sideWrap.rival')?.offsetHeight||0):(short?94:112);
+  const hudH=inGame?(document.querySelector('.sideWrap.player .player-panel')?.offsetHeight||0):(short?90:102);
+  avH=arenaH-rivalH-hudH-FRAME_PAD-4;avW=vw-20;cellMin=short?6:9;cellMax=short?30:36;
+ }else if(mode==='phone-l'){avH=vh-tb-12;avW=(vw-150)/2;cellMin=10;cellMax=26;}
  else if(mode==='tablet'){const pw=200;avH=vh-tb-tc-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
  else{const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||200;avH=vh-tb-24;avW=(vw-2*pw-100)/2;cellMin=14;cellMax=34;}
- avH=Math.max(avH,vh*(mode==='phone-p'?0.42:0.35));avW=Math.max(avW,vw*(mode==='phone-p'?0.88:0.2));
- const pCell=Math.max(cellMin,Math.min(cellMax,Math.floor(Math.min(avH/ROWS,avW/COLS))));
- CELL=pCell;
- if(mode==='phone-p'){
+ if(mode!=='phone-p'){avH=Math.max(avH,vh*.35);avW=Math.max(avW,vw*.2);}
+ else avH=Math.max(0,avH);
+ let pCell=Math.max(cellMin,Math.min(cellMax,Math.floor(Math.min(avH/ROWS,avW/COLS))));
+ if(mode==='phone-p'&&Game.P?.cv){
   const vCell=Math.max(7,Math.min(10,Math.floor(84/COLS)));
-  if(Game.P?.cv){Game.P.cv.width=pCell*COLS;Game.P.cv.height=pCell*ROWS;}
-  if(Game.V?.cv){Game.V.cv.width=vCell*COLS;Game.V.cv.height=vCell*ROWS;}
- }else for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}}
+  const dockLimit=()=>(dockOn?dock.getBoundingClientRect().top:arena?.getBoundingClientRect().bottom??vh)-10;
+  const overflows=()=>{const cv=Game.P.cv,fr=cv.closest('.boardFrame');
+   const bottom=Math.max(cv.getBoundingClientRect().bottom,fr?fr.getBoundingClientRect().bottom:0);
+   return bottom>dockLimit();};
+  for(;pCell>=cellMin;pCell--){
+   Game.P.cv.width=pCell*COLS;Game.P.cv.height=pCell*ROWS;
+   if(Game.V?.cv){Game.V.cv.width=vCell*COLS;Game.V.cv.height=vCell*ROWS;}
+   if(!overflows())break;
+  }
+  CELL=Math.max(cellMin,pCell);
+ }else{
+  CELL=pCell;
+  if(mode==='phone-p'){const vCell=Math.max(7,Math.min(10,Math.floor(84/COLS)));
+   if(Game.P?.cv){Game.P.cv.width=pCell*COLS;Game.P.cv.height=pCell*ROWS;}
+   if(Game.V?.cv){Game.V.cv.width=vCell*COLS;Game.V.cv.height=vCell*ROWS;}
+  }else for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}}}
 window.fitBoards=fitBoards;
 function onViewportChange(){fitFx();setLayout();}
 addEventListener('resize',onViewportChange);addEventListener('orientationchange',()=>setTimeout(onViewportChange,120));
@@ -627,7 +649,8 @@ function startGame(){
  setLayout();
  for(const B of [Game.P,Game.V]){B.next=nextType(B);spawn(B);updateHUD(B);}
  Game.V.ai.wait=2500;
- showSpell(Game.P,'¡A jugar, '+h.n.split(' ')[0]+'!');showSpell(Game.V,'¡Prepárate!',true);}
+ showSpell(Game.P,'¡A jugar, '+h.n.split(' ')[0]+'!');showSpell(Game.V,'¡Prepárate!',true);
+ requestAnimationFrame(()=>{fitBoards();requestAnimationFrame(fitBoards);});}
 function spawn(B){B.cur=mkPiece(B.next);B.next=nextType(B);B.lockT=0;B.lockResets=0;B.dropAcc=0;
  B.ai.plan=null;B.ai.t=0;if(B.cfg)B.ai.wait=Math.max(120,B.cfg.wait-(B.level-1)*40);
  if(collide(B,B.cur.m,B.cur.x,B.cur.y)){B.cur.y--;if(collide(B,B.cur.m,B.cur.x,B.cur.y)){if(isP(B)&&rescue(B))return spawn(B);endGame(B);return false;}}
