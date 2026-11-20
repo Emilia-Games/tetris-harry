@@ -451,7 +451,7 @@ body[data-layout="phone-l"] .touch-edge.left { grid-area: touchL; display: flex;
 body[data-layout="phone-l"] .touch-edge.right { grid-area: touchR; display: flex; }
 body[data-layout="phone-l"] #touch, body[data-layout="phone-l"] #touchDock { display: none !important; }
 body[data-layout="phone-l"] .panel, body[data-layout="phone-l"] .rivalBar { display: none !important; }
-body[data-layout="phone-l"] .phud { display: flex; }
+body[data-layout="phone-l"] .phud[hidden] { display: none !important; }
 body[data-layout="phone-l"] .sideRow { flex-direction: column; align-items: center; }
 
 /* tablet */
