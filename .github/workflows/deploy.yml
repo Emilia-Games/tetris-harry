@@ -1,0 +1,53 @@
+name: Desplegar juego por FTP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-tetris-harry-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Publicar en simgular.com
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+
+      - name: Resolver directorio remoto
+        id: remotedir
+        env:
+          FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
+        run: |
+          DIR="${FTP_SERVER_DIR:-./public_html/tetris-harry-potter/}"
+          case "$DIR" in
+            */) ;;
+            *) DIR="${DIR}/" ;;
+          esac
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Preparar solo archivos del juego
+        run: |
+          mkdir -p deploy/screenshots
+          cp index.html deploy/
+          cp screenshots/* deploy/screenshots/
+
+      - name: Subir por FTP/FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./deploy/
+          server-dir: ${{ steps.remotedir.outputs.dir }}
+          exclude: |
+            **/.git*
+            **/.github/**
+            **/README.md
+            **/LICENSE
+            **/.ftp-deploy-sync-state.json
