@@ -435,34 +435,7 @@ body.parchment-ui .endCard { background: linear-gradient(180deg, var(--parchment
   outline: none; box-shadow: var(--focus-ring);
 }
 
-/* data-layout: phone-p (default) */
-body[data-layout="phone-p"] #gameScreen.show,
-body:not([data-layout]) #gameScreen.show {
-  display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  grid-template-areas: "topbar" "rival" "player" "touch";
-}
-body[data-layout="phone-p"] #topBar, body:not([data-layout]) #gameScreen.show #topBar { grid-area: topbar; }
-body[data-layout="phone-p"] .rivalBar, body:not([data-layout]) #gameScreen.show .rivalBar { grid-area: rival; display: flex; }
-body[data-layout="phone-p"] #gameWrap, body:not([data-layout]) #gameScreen.show #gameWrap { grid-area: player; flex-direction: column; overflow: hidden; }
-body[data-layout="phone-p"] #touch, body:not([data-layout]) #gameScreen.show #touch {
-  grid-area: touch; z-index: 20; max-width: none; background: linear-gradient(0deg, rgba(10, 8, 36, 0.9), transparent);
-}
-body[data-layout="phone-p"] .vsCol, body:not([data-layout]) #gameScreen.show .vsCol { display: none; }
-body[data-layout="phone-p"] .sideWrap:last-child .panel, body:not([data-layout]) #gameScreen.show .sideWrap:last-child .panel { display: none; }
-body[data-layout="phone-p"] .sideWrap:last-child, body:not([data-layout]) #gameScreen.show .sideWrap:last-child { order: -1; }
-body[data-layout="phone-p"] .sideWrap:last-child .boardCol, body:not([data-layout]) #gameScreen.show .sideWrap:last-child .boardCol {
-  transform: scale(0.45); transform-origin: top center; margin-bottom: -12%;
-}
-body[data-layout="phone-p"] .sideWrap:first-child .panel, body:not([data-layout]) #gameScreen.show .sideWrap:first-child .panel { display: none; }
-body[data-layout="phone-p"] .phud, body:not([data-layout]) #gameScreen.show .phud { display: flex; }
-body[data-layout="phone-p"] .sideWrap:first-child .sideRow, body:not([data-layout]) #gameScreen.show .sideWrap:first-child .sideRow {
-  flex-direction: column; align-items: center; width: 100%;
-}
-body[data-layout="phone-p"] .sideWrap:first-child .boardCol, body:not([data-layout]) #gameScreen.show .sideWrap:first-child .boardCol {
-  flex: 1; width: 100%; max-width: min(100%, 420px);
-}
-body[data-layout="phone-p"] .tbtn, body:not([data-layout]) #gameScreen.show .tbtn { width: clamp(52px, 14vw, 64px); height: clamp(52px, 14vw, 64px); }
+/* data-layout: phone-p — ver bloque unificado más abajo (#gameScreen + #gameWrap) */
 
 /* phone-l */
 body[data-layout="phone-l"] #gameWrap {
@@ -481,9 +454,20 @@ body[data-layout="phone-l"] .sideRow { flex-direction: column; align-items: cent
 
 /* tablet */
 body[data-layout="tablet"] #gameWrap {
-  display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: start; max-width: 1100px; margin: 0 auto;
+  display: flex !important;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
-body[data-layout="tablet"] .vsCol { display: block; }
+body[data-layout="tablet"] #gameWrap > .touch-edge { display: none !important; }
+body[data-layout="tablet"] .sideWrap.player { flex: 1 1 0; min-width: 0; max-width: 50%; }
+body[data-layout="tablet"] .sideWrap.rival { flex: 1 1 0; min-width: 0; max-width: 50%; }
+body[data-layout="tablet"] .sideWrap .boardCol { flex: 1 1 auto; min-width: 0; display: flex; justify-content: center; }
+body[data-layout="tablet"] .rival-mini { flex: 0 0 auto; }
+body[data-layout="tablet"] .vsCol { display: block; flex: 0 0 auto; align-self: center; }
 body[data-layout="tablet"] .panel { display: flex !important; }
 body[data-layout="tablet"] .phud, body[data-layout="tablet"] .rivalBar { display: none !important; }
 body[data-layout="tablet"] .sideRow { flex-direction: row; }
@@ -512,12 +496,20 @@ body[data-layout="desktop"] #selWrap { grid-template-columns: minmax(280px, 1fr)
   .lvCards .card { flex: 0 0 calc(33.333% - 5px); }
 }
 @media (max-width: 720px) {
-  #topBar { padding: 6px calc(70px + var(--safe-r)) 4px calc(70px + var(--safe-l)); gap: 6px; flex-wrap: wrap; }
-  #topBar .ttl { order: 3; flex: 1 1 100%; text-align: center; margin: 0; font-size: clamp(0.85rem, 3.6vw, 1.2rem); }
+  body:not([data-layout="phone-p"]) #topBar { padding: 6px calc(70px + var(--safe-r)) 4px calc(70px + var(--safe-l)); gap: 6px; flex-wrap: wrap; }
+  body:not([data-layout="phone-p"]) #topBar .ttl { order: 3; flex: 1 1 100%; text-align: center; margin: 0; font-size: clamp(0.85rem, 3.6vw, 1.2rem); }
   .titleRow .gameLogo { width: clamp(44px, 14vw, 64px); height: clamp(44px, 14vw, 64px); }
 }
+body[data-layout="phone-p"] #selScreen #selWrap .side {
+  max-height: min(36vh, 280px);
+}
 @media (max-width: 1100px) {
-  body:not([data-layout="desktop"]):not([data-layout="tablet"]) #gameWrap { flex-direction: column; align-items: stretch; }
+  body[data-layout="tablet"] #gameWrap,
+  body[data-layout="phone-l"] #gameWrap { /* phone-p tiene reglas propias */ }
+  body:not([data-layout="desktop"]):not([data-layout="tablet"]):not([data-layout="phone-p"]):not([data-layout="phone-l"]) #gameWrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 @media (max-height: 520px) and (orientation: landscape) {
   #selScreen { overflow-y: auto; }
@@ -598,56 +590,6 @@ body[data-layout="desktop"] #selWrap { grid-template-columns: minmax(280px, 1fr)
 .rivalBar .hpLabel { font-size: 0.68rem; margin-bottom: 2px; }
 .rivalBar .boardFrame { padding: 3px; box-shadow: 0 0 16px rgba(120, 255, 170, 0.35); }
 
-body[data-layout="phone-p"] .sideWrap.rival,
-body:not([data-layout]) #gameScreen.show .sideWrap.rival {
-  width: 100%;
-}
-
-body[data-layout="phone-p"] .sideWrap.rival .sideRow,
-body:not([data-layout]) #gameScreen.show .sideWrap.rival .sideRow {
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-
-body[data-layout="phone-p"] .sideWrap.rival .boardCol,
-body:not([data-layout]) #gameScreen.show .sideWrap.rival .boardCol {
-  transform: scale(0.45);
-  transform-origin: top center;
-  margin-bottom: -12%;
-}
-
-body[data-layout="phone-p"] .sideWrap.rival .panel,
-body[data-layout="phone-p"] .sideWrap.player .panel,
-body:not([data-layout]) #gameScreen.show .sideWrap.rival .panel,
-body:not([data-layout]) #gameScreen.show .sideWrap.player .panel {
-  display: none;
-}
-
-body[data-layout="phone-p"] .sideWrap.player,
-body:not([data-layout]) #gameScreen.show .sideWrap.player {
-  flex: 1;
-  min-height: 0;
-  justify-content: center;
-}
-
-body[data-layout="phone-p"] .sideWrap.player .sideRow,
-body:not([data-layout]) #gameScreen.show .sideWrap.player .sideRow {
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-body[data-layout="phone-p"] .sideWrap.player .boardCol,
-body:not([data-layout]) #gameScreen.show .sideWrap.player .boardCol {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-}
-
 /* PHUD sobre tablero del jugador */
 .phud.glass-gold {
   border-radius: var(--radius-md);
@@ -659,32 +601,6 @@ body:not([data-layout]) #gameScreen.show .sideWrap.player .boardCol {
 
 .phud .hpLabel { font-size: 0.7rem; }
 .phud .tag { font-size: 0.68rem; }
-
-/* Dock táctil fijo en móvil vertical */
-body[data-layout="phone-p"] #touchDock,
-body:not([data-layout]) #gameScreen.show #touchDock {
-  display: none;
-}
-
-body[data-layout="phone-p"].touch-ui #touch,
-body:not([data-layout]).touch-ui #gameScreen.show #touch {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  max-width: none;
-  padding: 10px 12px calc(12px + var(--safe-b));
-  gap: 10px;
-  background: linear-gradient(0deg, rgba(10, 8, 36, 0.95) 65%, rgba(10, 8, 36, 0.4));
-  backdrop-filter: blur(14px);
-  border-top: 1px solid rgba(255, 216, 107, 0.25);
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
-}
-
-body[data-layout="phone-p"] .sideWrap.player #touch,
-body:not([data-layout]) #gameScreen.show .sideWrap.player #touch {
-  display: none;
-}
 
 /* Bordes laterales táctiles en phone-l */
 body[data-layout="phone-l"] .touch-edge .tbtn {
@@ -786,14 +702,8 @@ body[data-layout="desktop"] .center { flex: 0 1 380px; }
 }
 
 /* Zona jugador con margen para dock */
-body[data-layout="phone-p"] #gameScreen.show,
-body:not([data-layout]) #gameScreen.show {
-  padding-bottom: calc(var(--safe-b) + 4px);
-}
-
-body.touch-ui[data-layout="phone-p"] #gameScreen.show,
-body.touch-ui:not([data-layout]) #gameScreen.show {
-  padding-bottom: calc(88px + var(--safe-b));
+body[data-layout="phone-p"] #gameScreen.show {
+  padding-bottom: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -882,78 +792,243 @@ body.touch-ui #gameScreen #touchDock .touch-dock {
   #selWrap .lvCards .card { flex: 0 1 calc(33% - 6px); min-width: 100px; }
 }
 
-body[data-layout="phone-p"] #gameScreen #gameWrap {
-  flex-direction: column;
+/* ===== Móvil vertical (phone-p): rival arriba, tablero jugador centro, dock abajo ===== */
+body[data-layout="phone-p"] #topBar {
+  flex-wrap: nowrap;
+  justify-content: space-between;
   align-items: center;
-  justify-content: flex-start;
+  padding: 6px calc(52px + var(--safe-r)) 6px calc(52px + var(--safe-l));
   gap: 6px;
-  padding: 4px 6px;
 }
+body[data-layout="phone-p"] #topBar .ttl {
+  order: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: clamp(0.78rem, 3.4vw, 1rem);
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body[data-layout="phone-p"] #topBar .btn.small {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  padding: 7px 9px;
+  white-space: nowrap;
+}
+body[data-layout="phone-p"]:has(#gameScreen.show) #muteBtn,
+body[data-layout="phone-p"]:has(#gameScreen.show) #musicBtn {
+  top: calc(54px + var(--safe-t));
+  width: 38px;
+  height: 38px;
+  font-size: 1rem;
+  z-index: 55;
+}
+body[data-layout="phone-p"]:has(#gameScreen.show) #muteBtn { right: calc(10px + var(--safe-r)); }
+body[data-layout="phone-p"]:has(#gameScreen.show) #musicBtn { right: calc(54px + var(--safe-r)); font-size: 0.95rem; }
+
+body[data-layout="phone-p"] #gameScreen #gameWrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  gap: 6px;
+  padding: 0 6px;
+}
+body[data-layout="phone-p"] #gameWrap > .touch-edge,
+body[data-layout="phone-p"] #gameWrap > .vsCol {
+  display: none !important;
+}
+
 body[data-layout="phone-p"] .sideWrap.rival {
-  order: -1;
+  order: 1;
+  flex: 0 0 auto;
   width: 100%;
   max-width: 100%;
 }
 body[data-layout="phone-p"] .sideWrap.rival .sideRow {
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 8px;
   width: 100%;
-  padding: 6px 10px;
+  padding: 6px 8px;
   border-radius: var(--radius-md);
   background: var(--glass-bg);
   border: 2px solid rgba(170, 140, 255, 0.55);
   backdrop-filter: blur(var(--glass-blur));
+  overflow: hidden;
 }
 body[data-layout="phone-p"] .sideWrap.rival .rival-mini {
-  transform: scale(0.42);
-  transform-origin: center;
-  margin: -28% 0;
-  flex: none;
+  flex: 0 0 88px;
+  width: 88px;
+  min-width: 88px;
+  max-height: 118px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   pointer-events: none;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-mini .boardFrame {
+  transform: none;
+  margin: 0;
+  line-height: 0;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-mini canvas {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100%;
 }
 body[data-layout="phone-p"] .sideWrap.rival .rival-panel {
   display: flex !important;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  width: auto;
-  flex: 1;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
   min-width: 0;
-  padding: 6px 8px;
+  width: auto;
+  padding: 2px 4px;
+  border: none;
+  background: transparent;
 }
-body[data-layout="phone-p"] .sideWrap.rival .rival-panel .avatarBig { width: 40px; height: 40px; }
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .avatarBig {
+  display: none;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .pname {
+  font-size: 0.72rem;
+  line-height: 1.1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .tag,
 body[data-layout="phone-p"] .sideWrap.rival .rival-panel .stat,
 body[data-layout="phone-p"] .sideWrap.rival .rival-panel .minis,
-body[data-layout="phone-p"] .sideWrap.rival .rival-panel .spellTip { display: none !important; }
-body[data-layout="phone-p"] .sideWrap.rival .rival-panel .pname { font-size: 0.75rem; }
-body[data-layout="phone-p"] .sideWrap.player { width: 100%; flex: 1; min-height: 0; }
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .spellTip {
+  display: none !important;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .hpWrap {
+  width: 100%;
+  min-width: 0;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .hpBar {
+  height: 16px;
+}
+
+body[data-layout="phone-p"] .sideWrap.player {
+  order: 2;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 body[data-layout="phone-p"] .sideWrap.player .sideRow {
   flex-direction: column;
   align-items: center;
   width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 4px;
 }
 body[data-layout="phone-p"] .sideWrap.player .player-panel {
   display: flex !important;
+  flex: 0 0 auto;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 4px 6px;
   width: 100%;
-  gap: 6px;
-  padding: 6px 8px;
-  order: -1;
+  max-width: 100%;
+  padding: 5px 8px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 body[data-layout="phone-p"] .sideWrap.player .player-panel .avatarBig,
 body[data-layout="phone-p"] .sideWrap.player .player-panel .pname,
 body[data-layout="phone-p"] .sideWrap.player .player-panel .tag,
-body[data-layout="phone-p"] .sideWrap.player .player-panel .ghelp { display: none; }
-body[data-layout="phone-p"] .sideWrap.player .player-panel .stat { width: auto; flex: 1 1 88px; font-size: 0.72rem; }
-body[data-layout="phone-p"] .sideWrap.player .player-panel .minis { flex-direction: row; width: auto; }
-body[data-layout="phone-p"] .sideWrap.player .player-panel .hpWrap { flex: 1 1 140px; min-width: 120px; }
-body[data-layout="phone-p"] .sideWrap.player .boardCol { flex: 1; display: flex; justify-content: center; min-height: 0; }
+body[data-layout="phone-p"] .sideWrap.player .player-panel .ghelp {
+  display: none !important;
+}
+body[data-layout="phone-p"] .sideWrap.player .player-panel .hpWrap {
+  flex: 1 1 100%;
+  min-width: 0;
+  order: -1;
+}
+body[data-layout="phone-p"] .sideWrap.player .player-panel .stat {
+  flex: 1 1 0;
+  max-width: 33.33%;
+  font-size: 0.58rem;
+  min-width: 0;
+  padding: 2px 4px;
+  gap: 3px;
+}
+body[data-layout="phone-p"] .sideWrap.player .player-panel .stat b { flex-shrink: 0; }
+body[data-layout="phone-p"] .sideWrap.player .player-panel .stat span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body[data-layout="phone-p"] .sideWrap.player .player-panel .minis {
+  flex: 1 1 100%;
+  flex-direction: row;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+}
+body[data-layout="phone-p"] .sideWrap.player .player-panel .mini {
+  flex: 0 1 auto;
+  font-size: 0.6rem;
+  min-width: 0;
+}
+body[data-layout="phone-p"] .sideWrap.player .player-panel .mini canvas { max-width: 64px; height: auto; }
+body[data-layout="phone-p"] .sideWrap.player .boardCol {
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 100px;
+  max-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+body[data-layout="phone-p"] .sideWrap.player .boardFrame {
+  max-width: min(96vw, 340px);
+  max-height: 100%;
+  margin: 0 auto;
+  line-height: 0;
+}
+body[data-layout="phone-p"] .sideWrap.player .boardFrame canvas {
+  display: block;
+  max-width: 100%;
+  max-height: min(44dvh, 100%);
+  width: auto !important;
+  height: auto !important;
+}
+
+body[data-layout="phone-p"] #touchDock .touch-dock {
+  gap: 8px;
+}
+body[data-layout="phone-p"] #touchDock .tbtn {
+  width: clamp(50px, 13vw, 58px);
+  height: clamp(50px, 13vw, 58px);
+  font-size: 1.35rem;
+}
+@media (max-width: 400px) {
+  body[data-layout="phone-p"] #gameScreen #backBtn { padding: 6px 8px; font-size: 0.68rem; }
+  body[data-layout="phone-p"] #gameScreen #pauseBtn { padding: 6px 8px; font-size: 0.68rem; }
+}
+@media (max-height: 700px) {
+  body[data-layout="phone-p"] .sideWrap.player .player-panel .minis { display: none !important; }
+  body[data-layout="phone-p"] .sideWrap.player .player-panel { padding: 4px 6px; }
+  body[data-layout="phone-p"] #touchDock .touch-dock { gap: 6px; }
+  body[data-layout="phone-p"] #touchDock .tbtn { width: 46px; height: 46px; font-size: 1.15rem; }
+}
 
 body[data-layout="phone-l"] #gameScreen #gameWrap {
   display: grid !important;
