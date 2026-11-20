@@ -32,10 +32,17 @@ jobs:
 
       - name: Preparar solo archivos del juego
         run: |
+          set -euo pipefail
           mkdir -p deploy/screenshots deploy/icons
           cp index.html manifest.webmanifest deploy/
-          cp screenshots/* deploy/screenshots/
-          cp icons/* deploy/icons/
+          # Solo imágenes sueltas del README (p. ej. selection.png); no screenshots/responsive/ del PR.
+          shopt -s nullglob
+          for asset in screenshots/*.png screenshots/*.jpg screenshots/*.jpeg screenshots/*.webp; do
+            cp "$asset" deploy/screenshots/
+          done
+          for asset in icons/*; do
+            cp "$asset" deploy/icons/
+          done
 
       - name: Subir por FTP/FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
