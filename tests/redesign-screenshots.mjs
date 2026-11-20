@@ -106,13 +106,42 @@ function assertLayout(page, name, phase, minCell) {
             }
           }
         }
+        if (layout === 'touch-l') {
+          const pCv = document.getElementById('pBoard');
+          const vCv = document.getElementById('vBoard');
+          if (pCv && vCv) {
+            const pr = pCv.getBoundingClientRect();
+            const vr = vCv.getBoundingClientRect();
+            const cellP = pr.height / 20;
+            const cellV = vr.height / 20;
+            if (Math.abs(cellP - cellV) > 0.55) {
+              issues.push(
+                `${label}: celdas distintas jugador ${cellP.toFixed(2)}px vs rival ${cellV.toFixed(2)}px`
+              );
+            }
+            if (Math.abs(pr.width - vr.width) > 1.5) {
+              issues.push(
+                `${label}: ancho canvas jugador ${pr.width.toFixed(1)} ≠ rival ${vr.width.toFixed(1)}`
+              );
+            }
+          }
+          const pFr = document.getElementById('pFrame')?.getBoundingClientRect();
+          const vFr = document.getElementById('vFrame')?.getBoundingClientRect();
+          if (pFr && vFr && Math.abs(pFr.top - vFr.top) > 2) {
+            issues.push(
+              `${label}: tops desalineados pFrame ${pFr.top.toFixed(1)} vs vFrame ${vFr.top.toFixed(1)}`
+            );
+          }
+        }
         if (iw > ih) {
           const frames = ['pFrame', 'vFrame']
             .map((id) => document.getElementById(id)?.getBoundingClientRect())
             .filter(Boolean);
-          const panels = [
-            ...document.querySelectorAll('#gameScreen .panel'),
-          ].map((el) => el.getBoundingClientRect());
+          const panelEls =
+            layout === 'touch-l'
+              ? [...document.querySelectorAll('#gameScreen .rival-panel')]
+              : [...document.querySelectorAll('#gameScreen .panel')];
+          const panels = panelEls.map((el) => el.getBoundingClientRect());
           const targets = [...frames, ...panels];
           const btns = [
             ...document.querySelectorAll(

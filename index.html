@@ -112,17 +112,33 @@
     <div class="sideWrap player">
       <div class="phud glass" id="phud" hidden></div>
       <div class="sideRow">
-        <div class="panel good glass player-panel">
-          <div class="avatarBig" id="pAv"></div>
-          <div class="pname" id="pName"></div>
-          <div class="tag" id="pTag">🧒 ¡Tú!</div>
-          <div class="hpWrap"><div class="hpLabel">💛 Tu magia</div><div class="hpBar"><div class="hpFill good" id="pHpFill"></div><div class="hpTxt" id="pHpTxt">100</div></div></div>
-          <div class="statsLine">
-            <div class="stat"><span>⭐ Puntos</span><b id="pScore">0</b></div>
-            <div class="stat"><span>🏆 Nivel</span><b id="pLevel">1</b></div>
-            <div class="stat"><span>📏 Líneas</span><b id="pLines">0</b></div>
+        <div class="playerAside">
+          <div class="panel good glass player-panel">
+            <div class="avatarBig" id="pAv"></div>
+            <div class="pname" id="pName"></div>
+            <div class="tag" id="pTag">🧒 ¡Tú!</div>
+            <div class="hpWrap"><div class="hpLabel">💛 Tu magia</div><div class="hpBar"><div class="hpFill good" id="pHpFill"></div><div class="hpTxt" id="pHpTxt">100</div></div></div>
+            <div class="statsLine">
+              <div class="stat"><span>⭐ Puntos</span><b id="pScore">0</b></div>
+              <div class="stat"><span>🏆 Nivel</span><b id="pLevel">1</b></div>
+              <div class="stat"><span>📏 Líneas</span><b id="pLines">0</b></div>
+            </div>
+            <div class="ghelp kbd-only"><kbd>⬅️</kbd><kbd>➡️</kbd> mover · <kbd>⬆️</kbd> girar<br><kbd>⬇️</kbd> bajar · <kbd>Espacio</kbd> caer<br><kbd>C</kbd> guardar · <kbd>P</kbd> pausa</div>
           </div>
-          <div class="ghelp kbd-only"><kbd>⬅️</kbd><kbd>➡️</kbd> mover · <kbd>⬆️</kbd> girar<br><kbd>⬇️</kbd> bajar · <kbd>Espacio</kbd> caer<br><kbd>C</kbd> guardar · <kbd>P</kbd> pausa</div>
+          <nav id="touchPad" class="touch-pad" aria-label="Mando táctil">
+            <div class="pad-dpad" aria-label="Cruceta">
+              <button type="button" class="tbtn pad-up" data-a="rot" aria-label="Girar">⬆️</button>
+              <button type="button" class="tbtn pad-left" data-a="left" aria-label="Izquierda">⬅️</button>
+              <span class="pad-hub" aria-hidden="true"></span>
+              <button type="button" class="tbtn pad-right" data-a="right" aria-label="Derecha">➡️</button>
+              <button type="button" class="tbtn pad-down" data-a="down" aria-label="Bajar">⬇️</button>
+            </div>
+            <div class="pad-actions" aria-label="Botones de acción">
+              <button type="button" class="tbtn drop pad-act" data-a="drop" aria-label="Caída rápida">⏬</button>
+              <button type="button" class="tbtn hold pad-act" data-a="hold" aria-label="Guardar">🎒</button>
+              <button type="button" class="tbtn pad-act" data-a="pause" aria-label="Pausa">⏸️</button>
+            </div>
+          </nav>
         </div>
         <div class="boardStage">
           <div class="mini flank"><span>Sig.</span><canvas id="pNext" width="72" height="48"></canvas></div>
@@ -130,20 +146,6 @@
           <div class="mini flank"><span>Guar.</span><canvas id="pHold" width="72" height="48"></canvas></div>
         </div>
       </div>
-      <nav id="touchPad" class="touch-pad" aria-label="Mando táctil">
-        <div class="pad-dpad" aria-label="Cruceta">
-          <button type="button" class="tbtn pad-up" data-a="rot" aria-label="Girar">⬆️</button>
-          <button type="button" class="tbtn pad-left" data-a="left" aria-label="Izquierda">⬅️</button>
-          <span class="pad-hub" aria-hidden="true"></span>
-          <button type="button" class="tbtn pad-right" data-a="right" aria-label="Derecha">➡️</button>
-          <button type="button" class="tbtn pad-down" data-a="down" aria-label="Bajar">⬇️</button>
-        </div>
-        <div class="pad-actions" aria-label="Botones de acción">
-          <button type="button" class="tbtn drop pad-act" data-a="drop" aria-label="Caída rápida">⏬</button>
-          <button type="button" class="tbtn hold pad-act" data-a="hold" aria-label="Guardar">🎒</button>
-          <button type="button" class="tbtn pad-act" data-a="pause" aria-label="Pausa">⏸️</button>
-        </div>
-      </nav>
     </div>
     <div class="vsCol">⚡<br>VS<br>⚡</div>
     <div class="sideWrap rival">
@@ -649,16 +651,11 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
   const vsW=36;avW=(vw-touchW-vsW-12)/2;
  }else if(mode==='touch-l'){
   const margin=8;
-  const inGame=document.getElementById('gameScreen')?.classList.contains('show');
-  const pad=document.getElementById('touchPad');
-  let padH=0;
-  if(inGame&&pad){
-   const pr=pad.getBoundingClientRect();
-   padH=(pr.height>8?pr.height:212)+8;
-  }
-  avH=vh-tb-margin-padH;cellMin=12;cellMax=Math.floor(Math.max(avH,vh-tb-margin-padH)/ROWS);
-  const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||Math.max(150,Math.min(200,vw*.14));
-  avW=(vw-40-2*pw)/2;
+  avH=vh-tb-margin;cellMin=12;cellMax=Math.floor(avH/ROWS);
+  const aside=document.querySelector('.sideWrap.player .playerAside');
+  const pwP=aside?.getBoundingClientRect().width||document.querySelector('.sideWrap.player .panel')?.offsetWidth||175;
+  const pwV=document.querySelector('.sideWrap.rival .panel')?.getBoundingClientRect().width||pwP;
+  avW=(vw-48-32-pwP-pwV)/2;
  }else if(mode==='tablet'){const pw=200;avH=vh-tb-(dockOn?tc:0)-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
  else{const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||200;avH=vh-tb-24;avW=(vw-2*pw-100)/2;cellMin=14;cellMax=34;}
  if(mode==='desktop'||mode==='tablet'){avH=Math.max(avH,vh*.35);avW=Math.max(avW,vw*.2);}
@@ -681,10 +678,20 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
    if(Game.V?.cv){Game.V.cv.width=vCell*COLS;Game.V.cv.height=vCell*ROWS;}
   }else{
    for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
-   if((mode==='phone-l'||mode==='touch-l')&&Game.P?.cv){
-    const padEl=mode==='touch-l'?document.getElementById('touchPad'):null;
-    const padBottom=padEl&&getComputedStyle(padEl).display!=='none'?padEl.getBoundingClientRect().bottom:vh;
-    const limit=Math.min(vh-4,padBottom-2);
+   if(mode==='touch-l'&&Game.P?.cv){
+    const limit=vh-4;
+    while(pCell>8){
+     let ok=true;
+     for(const id of ['pFrame','vFrame']){
+      const fb=document.getElementById(id)?.getBoundingClientRect().bottom||0;
+      if(fb>limit){ok=false;break;}
+     }
+     if(ok)break;pCell--;
+     for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
+    }
+    CELL=pCell;
+   }else if(mode==='phone-l'&&Game.P?.cv){
+    const limit=vh-4;
     while(pCell>8){
      let ok=true;
      for(const id of ['pFrame','vFrame']){

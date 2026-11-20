@@ -1209,7 +1209,7 @@ body[data-layout="touch-l"] #gameScreen #gameWrap {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr);
   grid-template-areas: "player vs rival";
-  align-items: center;
+  align-items: start;
   gap: 8px;
   padding: 2px 8px 4px;
   width: 100%;
@@ -1223,19 +1223,45 @@ body[data-layout="touch-l"] .sideWrap.player {
   grid-area: player;
   min-width: 0;
   max-width: none;
+}
+body[data-layout="touch-l"] .sideWrap.player .playerAside {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  min-height: 0;
+  align-items: stretch;
+  flex: 0 0 auto;
   gap: 4px;
+  min-width: 0;
+  width: max-content;
+  max-width: min(270px, 32vw);
 }
-body[data-layout="touch-l"] .sideWrap.player .sideRow {
-  flex: 1 1 auto;
-  min-height: 0;
+body[data-layout="touch-l"] #touchPad {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+body[data-layout="touch-l"] .sideWrap.player .playerAside .panel {
   width: 100%;
-  align-items: flex-start;
+  flex: 0 0 auto;
 }
+body[data-layout="touch-l"] .sideWrap.player .player-panel .ghelp { display: none !important; }
+body[data-layout="touch-l"] .sideWrap.player .player-panel .statsLine {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px 6px;
+  align-items: center;
+  justify-content: space-between;
+}
+body[data-layout="touch-l"] .sideWrap.player .player-panel .statsLine .stat {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: clamp(0.62rem, 1.5vw, 0.78rem);
+  padding: 2px 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+body[data-layout="touch-l"] .sideWrap.player .player-panel .statsLine .stat span { font-size: 0.9em; }
+body[data-layout="touch-l"] .sideWrap.player .player-panel .avatarBig { width: clamp(48px, 8vw, 64px); height: clamp(48px, 8vw, 64px); }
+body[data-layout="touch-l"] .sideWrap.player .player-panel .pname { font-size: clamp(0.7rem, 1.6vw, 0.88rem); }
 body[data-layout="touch-l"] .vsCol { grid-area: vs; display: block !important; align-self: center; font-size: clamp(0.85rem, 1.6vw, 1.1rem); }
 body[data-layout="touch-l"] .sideWrap.rival { grid-area: rival; min-width: 0; max-width: none; }
 body[data-layout="touch-l"] .sideWrap .sideRow {
@@ -1260,7 +1286,7 @@ body[data-layout="touch-l"] .rival-mini {
   min-width: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 body[data-layout="touch-l"] .boardStage { display: contents; }
 body[data-layout="touch-l"] .boardStage > .mini.flank { display: none !important; }
@@ -1273,7 +1299,6 @@ body[data-layout="touch-l"] .sideWrap .boardFrame { max-width: 100%; }
   flex-direction: row;
   align-items: flex-end;
   gap: 10px;
-  margin-top: auto;
   padding: 6px 4px 2px;
   border-radius: var(--radius-lg);
   background: linear-gradient(165deg, rgba(30, 16, 70, 0.92), rgba(12, 8, 36, 0.88));
@@ -1281,7 +1306,19 @@ body[data-layout="touch-l"] .sideWrap .boardFrame { max-width: 100%; }
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   z-index: 6;
 }
-body[data-layout="touch-l"] #gameScreen.show #touchPad { display: flex; }
+body[data-layout="touch-l"] #gameScreen.show #touchPad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+body[data-layout="touch-l"] .pad-actions {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 6px;
+  padding-bottom: 0;
+}
 .pad-dpad {
   display: grid;
   grid-template-columns: repeat(3, clamp(56px, 8.5vh, 64px));
