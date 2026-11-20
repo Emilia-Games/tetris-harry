@@ -130,6 +130,20 @@
           <div class="mini flank"><span>Guar.</span><canvas id="pHold" width="72" height="48"></canvas></div>
         </div>
       </div>
+      <nav id="touchPad" class="touch-pad" aria-label="Mando táctil">
+        <div class="pad-dpad" aria-label="Cruceta">
+          <button type="button" class="tbtn pad-up" data-a="rot" aria-label="Girar">⬆️</button>
+          <button type="button" class="tbtn pad-left" data-a="left" aria-label="Izquierda">⬅️</button>
+          <span class="pad-hub" aria-hidden="true"></span>
+          <button type="button" class="tbtn pad-right" data-a="right" aria-label="Derecha">➡️</button>
+          <button type="button" class="tbtn pad-down" data-a="down" aria-label="Bajar">⬇️</button>
+        </div>
+        <div class="pad-actions" aria-label="Botones de acción">
+          <button type="button" class="tbtn drop pad-act" data-a="drop" aria-label="Caída rápida">⏬</button>
+          <button type="button" class="tbtn hold pad-act" data-a="hold" aria-label="Guardar">🎒</button>
+          <button type="button" class="tbtn pad-act" data-a="pause" aria-label="Pausa">⏸️</button>
+        </div>
+      </nav>
     </div>
     <div class="vsCol">⚡<br>VS<br>⚡</div>
     <div class="sideWrap rival">
@@ -634,11 +648,17 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
   let touchW=112;touch.forEach(el=>{touchW+=el.getBoundingClientRect().width||52;});
   const vsW=36;avW=(vw-touchW-vsW-12)/2;
  }else if(mode==='touch-l'){
-  const margin=10;
-  avH=vh-tb-margin;cellMin=10;cellMax=Math.floor(avH/ROWS);
-  let touchW=24;document.querySelectorAll('#gameWrap .touch-edge').forEach(el=>{touchW+=el.getBoundingClientRect().width||56;});
+  const margin=8;
+  const inGame=document.getElementById('gameScreen')?.classList.contains('show');
+  const pad=document.getElementById('touchPad');
+  let padH=0;
+  if(inGame&&pad){
+   const pr=pad.getBoundingClientRect();
+   padH=(pr.height>8?pr.height:212)+8;
+  }
+  avH=vh-tb-margin-padH;cellMin=12;cellMax=Math.floor(Math.max(avH,vh-tb-margin-padH)/ROWS);
   const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||Math.max(150,Math.min(200,vw*.14));
-  avW=(vw-touchW-48-2*pw)/2;
+  avW=(vw-40-2*pw)/2;
  }else if(mode==='tablet'){const pw=200;avH=vh-tb-(dockOn?tc:0)-20;avW=(vw-2*pw-90)/2;cellMin=12;cellMax=30;}
  else{const pw=document.querySelector('#gameScreen .panel')?.offsetWidth||200;avH=vh-tb-24;avW=(vw-2*pw-100)/2;cellMin=14;cellMax=34;}
  if(mode==='desktop'||mode==='tablet'){avH=Math.max(avH,vh*.35);avW=Math.max(avW,vw*.2);}
@@ -662,7 +682,9 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
   }else{
    for(const B of [Game.P,Game.V])if(B?.cv){B.cv.width=pCell*COLS;B.cv.height=pCell*ROWS;}
    if((mode==='phone-l'||mode==='touch-l')&&Game.P?.cv){
-    const limit=vh-4;
+    const padEl=mode==='touch-l'?document.getElementById('touchPad'):null;
+    const padBottom=padEl&&getComputedStyle(padEl).display!=='none'?padEl.getBoundingClientRect().bottom:vh;
+    const limit=Math.min(vh-4,padBottom-2);
     while(pCell>8){
      let ok=true;
      for(const id of ['pFrame','vFrame']){
@@ -823,7 +845,7 @@ addEventListener('keydown',e=>{if(!document.getElementById('gameScreen').classLi
   z:()=>rotate(P,-1),Z:()=>rotate(P,-1),x:()=>rotate(P,1),X:()=>rotate(P,1),c:()=>doHold(P),C:()=>doHold(P),Shift:()=>doHold(P),p:togglePause,P:togglePause,Escape:togglePause};
  if(map[e.key]){e.preventDefault();ac();map[e.key]();}});
 const ACT={left:()=>move(Game.P,-1),right:()=>move(Game.P,1),down:()=>softDrop(Game.P),rot:()=>rotate(Game.P,1),drop:()=>hardDrop(Game.P),hold:()=>doHold(Game.P),pause:togglePause};
- document.querySelectorAll('.tbtn, .touch-edge .tbtn').forEach(b=>{let t1,t2;const a=b.dataset.a,rep=['left','right','down'].includes(a);
+ document.querySelectorAll('#touch .tbtn, .touch-edge .tbtn, #touchPad .tbtn').forEach(b=>{if(!b.dataset.a)return;let t1,t2;const a=b.dataset.a,rep=['left','right','down'].includes(a);
  const stop=()=>{clearTimeout(t1);clearInterval(t2);};
  b.addEventListener('pointerdown',e=>{e.preventDefault();ac();ACT[a]();if(rep){t1=setTimeout(()=>{t2=setInterval(ACT[a],70)},220);}});
  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));});
@@ -831,7 +853,7 @@ const ACT={left:()=>move(Game.P,-1),right:()=>move(Game.P,1),down:()=>softDrop(G
 (function(){const zone=document.getElementById('pSwipe');if(!zone)return;let sx=0,sy=0,active=false,pid=null;
  const end=()=>{active=false;pid=null;};
  zone.addEventListener('pointerdown',e=>{if(!document.getElementById('gameScreen').classList.contains('show'))return;
-  if(e.target.closest('#touch,.btn'))return;active=true;sx=e.clientX;sy=e.clientY;pid=e.pointerId;zone.setPointerCapture(e.pointerId);ac();});
+  if(e.target.closest('#touch,#touchPad,.btn'))return;active=true;sx=e.clientX;sy=e.clientY;pid=e.pointerId;zone.setPointerCapture(e.pointerId);ac();});
  zone.addEventListener('pointerup',e=>{if(!active||e.pointerId!==pid)return;end();
   const dx=e.clientX-sx,dy=e.clientY-sy,d=Math.hypot(dx,dy);if(d<22){rotate(Game.P,1);return;}
   if(Math.abs(dx)>Math.abs(dy)){move(Game.P,dx>0?1:-1);}else if(dy>28)hardDrop(Game.P);else if(dy>0)softDrop(Game.P);});

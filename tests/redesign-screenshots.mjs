@@ -110,16 +110,22 @@ function assertLayout(page, name, phase, minCell) {
           const frames = ['pFrame', 'vFrame']
             .map((id) => document.getElementById(id)?.getBoundingClientRect())
             .filter(Boolean);
+          const panels = [
+            ...document.querySelectorAll('#gameScreen .panel'),
+          ].map((el) => el.getBoundingClientRect());
+          const targets = [...frames, ...panels];
           const btns = [
-            ...document.querySelectorAll('#touchDock .tbtn, #touchL .tbtn, #touchR .tbtn'),
+            ...document.querySelectorAll(
+              '#touchDock .tbtn, #touchL .tbtn, #touchR .tbtn, #touchPad .tbtn'
+            ),
           ];
           for (const btn of btns) {
             const br = btn.getBoundingClientRect();
             if (br.width < 2 || br.height < 2) continue;
-            for (const fr of frames) {
-              if (intersects(br, fr)) {
+            for (const tr of targets) {
+              if (intersects(br, tr)) {
                 issues.push(
-                  `${label}: control táctil solapa tablero (botón ${btn.getAttribute('data-a') || '?'} vs frame)`
+                  `${label}: control táctil solapa juego (botón ${btn.getAttribute('data-a') || '?'})`
                 );
               }
             }

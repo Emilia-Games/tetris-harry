@@ -1207,20 +1207,35 @@ body[data-layout="touch-l"] #touch,
 body.touch-ui[data-layout="touch-l"] #gameScreen #touchDock { display: none !important; }
 body[data-layout="touch-l"] #gameScreen #gameWrap {
   display: grid !important;
-  grid-template-columns: minmax(56px, auto) minmax(0, 1fr) 36px minmax(0, 1fr) minmax(56px, auto);
-  grid-template-areas: "touchL player vs rival touchR";
+  grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr);
+  grid-template-areas: "player vs rival";
   align-items: center;
-  gap: 6px;
-  padding: 2px 6px;
+  gap: 8px;
+  padding: 2px 8px 4px;
   width: 100%;
   max-height: 100%;
   min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
 }
-body[data-layout="touch-l"] .touch-edge.left { grid-area: touchL; display: flex !important; }
-body[data-layout="touch-l"] .touch-edge.right { grid-area: touchR; display: flex !important; }
-body[data-layout="touch-l"] .sideWrap.player { grid-area: player; min-width: 0; max-width: none; }
+body[data-layout="touch-l"] .touch-edge { display: none !important; }
+body[data-layout="touch-l"] .sideWrap.player {
+  grid-area: player;
+  min-width: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 0;
+  gap: 4px;
+}
+body[data-layout="touch-l"] .sideWrap.player .sideRow {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  align-items: flex-start;
+}
 body[data-layout="touch-l"] .vsCol { grid-area: vs; display: block !important; align-self: center; font-size: clamp(0.85rem, 1.6vw, 1.1rem); }
 body[data-layout="touch-l"] .sideWrap.rival { grid-area: rival; min-width: 0; max-width: none; }
 body[data-layout="touch-l"] .sideWrap .sideRow {
@@ -1249,17 +1264,68 @@ body[data-layout="touch-l"] .rival-mini {
 }
 body[data-layout="touch-l"] .boardStage { display: contents; }
 body[data-layout="touch-l"] .boardStage > .mini.flank { display: none !important; }
-body[data-layout="touch-l"] .touch-edge {
-  align-self: stretch;
-  justify-content: space-evenly;
-  padding: 6px 4px;
-}
-body[data-layout="touch-l"] .touch-edge .tbtn {
-  width: clamp(48px, 7vh, 58px);
-  height: clamp(48px, 7vh, 58px);
-  font-size: clamp(1.1rem, 2.2vh, 1.35rem);
-}
 body[data-layout="touch-l"] .sideWrap .boardFrame { max-width: 100%; }
+
+/* Gamepad compacto abajo-izquierda (solo touch-l) */
+#touchPad {
+  display: none;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: auto;
+  padding: 6px 4px 2px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(165deg, rgba(30, 16, 70, 0.92), rgba(12, 8, 36, 0.88));
+  border: 2px solid rgba(255, 216, 107, 0.45);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  z-index: 6;
+}
+body[data-layout="touch-l"] #gameScreen.show #touchPad { display: flex; }
+.pad-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, clamp(56px, 8.5vh, 64px));
+  grid-template-rows: repeat(3, clamp(56px, 8.5vh, 64px));
+  grid-template-areas:
+    ". up ."
+    "left hub right"
+    ". down .";
+  gap: 4px;
+  justify-items: center;
+  align-items: center;
+}
+.pad-hub {
+  grid-area: hub;
+  width: clamp(44px, 6.5vh, 52px);
+  height: clamp(44px, 6.5vh, 52px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), rgba(40, 28, 90, 0.85));
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+.pad-up { grid-area: up; }
+.pad-left { grid-area: left; }
+.pad-right { grid-area: right; }
+.pad-down { grid-area: down; }
+#touchPad .tbtn {
+  width: clamp(56px, 8.5vh, 64px);
+  height: clamp(56px, 8.5vh, 64px);
+  font-size: clamp(1.2rem, 2.4vh, 1.5rem);
+  border-radius: 18px;
+  margin: 0;
+}
+.pad-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-bottom: 2px;
+}
+#touchPad .pad-act {
+  width: clamp(56px, 8.5vh, 64px);
+  height: clamp(56px, 8.5vh, 64px);
+}
 
 .glass.side::before {
   content: "";
