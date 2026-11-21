@@ -1790,3 +1790,157 @@ body[data-layout="phone-l"] .touch-edge .tbtn {
   from { filter: brightness(1); transform: scale(1); }
   to { filter: brightness(1.15); transform: scale(1.06); }
 }
+
+/* ===== Pantalla de modos e historia ===== */
+#modeScreen {
+  justify-content: center;
+  gap: clamp(12px, 3vh, 28px);
+  padding: calc(12px + var(--safe-t)) 16px calc(16px + var(--safe-b));
+  overflow-y: auto;
+}
+.mode-title-row { margin-bottom: 0; }
+body[data-layout="phone-p"] #modeScreen h1.mode-title,
+body[data-layout="phone-l"] #modeScreen h1.mode-title { display: none; }
+.mode-sub {
+  text-align: center;
+  font-size: clamp(1rem, 3.5vw, 1.25rem);
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 360px;
+}
+.mode-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 380px);
+}
+.mode-btn {
+  width: 100%;
+  font-size: clamp(1.15rem, 4.5vw, 1.5rem);
+  padding: 18px 24px;
+}
+#storyHeroScreen, #storyMapScreen {
+  padding: calc(10px + var(--safe-t)) 12px calc(12px + var(--safe-b));
+  overflow-y: auto;
+  gap: 10px;
+}
+.story-h2 { font-family: var(--font-display); font-size: clamp(1.2rem, 4vw, 1.65rem); text-align: center; }
+.story-lead, .story-meta { text-align: center; font-size: 0.92rem; opacity: 0.92; max-width: 420px; margin: 0 auto; }
+.story-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+  width: min(100%, 520px);
+  margin: 8px auto;
+}
+.story-hero-card.card {
+  min-height: 108px;
+  padding: 8px;
+}
+.story-hero-card.card.sel { box-shadow: var(--focus-ring); }
+.story-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+.story-map-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(100%, 560px);
+  margin: 0 auto;
+}
+.story-map-av svg { width: 72px; height: 72px; display: block; }
+.story-map-scroll { flex: 1; min-height: 0; overflow-y: auto; width: 100%; max-width: 520px; margin: 0 auto; }
+.story-map-path { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.story-node {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  text-align: left; width: 100%;
+  padding: 12px 14px; border-radius: var(--radius-md);
+  background: var(--glass-bg); border: 2px solid var(--glass-border);
+  color: #fff; cursor: pointer; font-family: var(--font-body);
+}
+.story-node.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.5); }
+.story-node.done { border-color: rgba(125, 255, 176, 0.5); }
+.story-node.current { border-color: var(--gold); box-shadow: var(--shadow-glow-gold); }
+.story-node-num { font-weight: 800; color: var(--gold); font-size: 1.1rem; }
+.story-node-t { font-weight: 700; font-size: 0.95rem; }
+.story-node-b { font-size: 0.78rem; opacity: 0.85; }
+.story-connector { height: 18px; width: 4px; margin: 2px auto; background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+.story-connector.lit { background: linear-gradient(180deg, var(--gold), #7dffb0); }
+.story-panel-screen {
+  justify-content: center;
+  padding: calc(8px + var(--safe-t)) 12px calc(12px + var(--safe-b));
+  overflow-y: auto;
+}
+.story-panel-card {
+  width: min(100%, 440px);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+.story-panel-art svg { width: 100%; height: auto; border-radius: var(--radius-md); display: block; }
+.story-panel-text p { font-size: clamp(1rem, 3.8vw, 1.15rem); line-height: 1.45; margin: 6px 0; }
+.story-panel-step { text-align: center; font-size: 0.8rem; opacity: 0.7; }
+.story-reward .story-reward-card { max-width: 380px; text-align: center; }
+.story-reward-icon { font-size: 3rem; margin: 8px 0; }
+.story-reward-tag { font-family: var(--font-display); color: var(--gold); font-size: 1.35rem; }
+.story-reward-lv { font-weight: 700; color: #7dffb0; min-height: 1.2em; }
+#selToMode { margin-top: 6px; }
+
+#profileScreen {
+  padding: calc(56px + var(--safe-t)) 14px calc(12px + var(--safe-b));
+  overflow-y: auto;
+  gap: 12px;
+}
+.profile-h2 { margin-top: 0; text-align: center; }
+.profile-foot { margin-top: auto; }
+.profile-list { display: flex; flex-direction: column; gap: 8px; width: min(100%, 420px); margin: 0 auto; }
+.profile-row { display: flex; gap: 8px; align-items: stretch; }
+.profile-pick { flex: 1; text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; }
+.profile-name { font-weight: 800; font-size: 1.05rem; }
+.profile-hint { font-size: 0.78rem; opacity: 0.85; }
+.profile-del { width: 48px; flex: 0 0 48px; border-radius: var(--radius-md); border: 2px solid rgba(255,255,255,.25); background: rgba(40,20,90,.6); cursor: pointer; }
+.profile-new { padding: 14px; width: min(100%, 420px); margin: 0 auto; display: flex; flex-direction: column; gap: 10px; border-radius: var(--radius-lg); }
+.profile-label { font-weight: 700; font-size: 0.9rem; }
+.profile-input {
+  width: 100%;
+  font-size: 1.25rem;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--gold);
+  background: rgba(255,255,255,.95);
+  color: #2b1650;
+  font-family: var(--font-body);
+}
+.story-choice-row { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 8px; }
+.story-choice-prompt { font-weight: 700; text-align: center; font-size: 1.05rem; }
+.story-choice-row .btn { width: 100%; }
+#storyChoiceRow[hidden],
+#storyPanelNext[hidden] { display: none !important; }
+.story-reward.show .story-reward-card { animation: none !important; opacity: 1 !important; }
+.story-reward.show { background: rgba(10, 5, 40, 0.72); }
+.story-hero-card.story-soon { opacity: 0.55; cursor: not-allowed; }
+.story-soon-tag {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ffd86b;
+  margin-top: 4px;
+}
+.story-duel-caption {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.78rem;
+  opacity: 0.9;
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+#topBar { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 6px; }
+#topBar .ttl { grid-column: 2; text-align: center; }
+#topBar .story-duel-caption { grid-column: 1 / -1; }

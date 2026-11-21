@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p deploy/screenshots deploy/icons deploy/fonts
-          cp index.html manifest.webmanifest theme.css deploy/
+          cp index.html manifest.webmanifest theme.css story-mode.js story-profiles.js stories.js story-scenes.js deploy/
           # Solo imágenes sueltas del README (p. ej. selection.png); no screenshots/responsive/ del PR.
           shopt -s nullglob
           for asset in screenshots/*.png screenshots/*.jpg screenshots/*.jpeg screenshots/*.webp; do

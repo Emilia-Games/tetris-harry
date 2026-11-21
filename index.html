@@ -50,8 +50,86 @@
 <div id="flashScr"></div>
 <button id="muteBtn" title="Efectos de sonido">🔊</button><button id="musicBtn" title="Música">🎵</button>
 
+<!-- PERFILES -->
+<section id="profileScreen" class="screen">
+  <h2 class="story-h2 profile-h2">¿Quién juega?</h2>
+  <div id="profileList" class="profile-list"></div>
+  <div class="profile-new glass">
+    <input id="profileNameInput" class="profile-input" type="text" maxlength="16" placeholder="Tu nombre" autocomplete="off" aria-label="Tu nombre">
+    <button type="button" class="btn big green" id="profileCreateBtn">▶️ Empezar</button>
+  </div>
+  <div class="story-foot profile-foot">
+    <button type="button" class="btn purple" id="profileBack">🏠 Modos</button>
+  </div>
+</section>
+
+<!-- MODO DE JUEGO -->
+<section id="modeScreen" class="screen show">
+  <div class="titleRow mode-title-row">
+    <img class="gameLogo" src="icons/icon.svg" alt="" width="72" height="72" decoding="async">
+    <h1 class="title mode-title">Tetris Mágico</h1>
+  </div>
+  <p class="mode-sub">¿Cómo quieres jugar hoy?</p>
+  <div class="mode-btns">
+    <button type="button" class="btn big mode-btn" id="btnModeNormal">⚔️ Modo Normal</button>
+    <button type="button" class="btn big purple mode-btn" id="btnModeStory">📖 Modo Historia</button>
+  </div>
+</section>
+
+<section id="storyHeroScreen" class="screen">
+  <h2 class="story-h2">📖 Elige tu mago</h2>
+  <p class="story-lead" id="storyHeroLead">Elige un héroe con historia lista. Otros: Próximamente.</p>
+  <div class="story-hero-grid" id="storyHeroCards"></div>
+  <div class="story-foot">
+    <button type="button" class="btn purple" id="storyHeroBack">🏠 Modos</button>
+    <button type="button" class="btn big green" id="storyMapContinue" disabled>▶️ Ver mapa</button>
+  </div>
+</section>
+
+<section id="storyMapScreen" class="screen">
+  <div class="story-map-head">
+    <div id="storyMapHero" class="story-map-av"></div>
+    <div>
+      <h2 class="story-h2" id="storyMapTitle">Historia</h2>
+      <p id="storyMapMeta" class="story-meta"></p>
+    </div>
+  </div>
+  <div class="story-map-scroll">
+    <div id="storyMapPath" class="story-map-path"></div>
+  </div>
+  <div class="story-foot">
+    <button type="button" class="btn purple small" id="storyMapBack">🏠 Modos</button>
+    <button type="button" class="btn small" id="storyMapRestart">🔄 Empezar otra vez</button>
+  </div>
+</section>
+
+<section id="storyPanelScreen" class="screen story-panel-screen">
+  <div class="story-panel-card glass-gold">
+    <div class="story-panel-art" id="storyPanelArt"></div>
+    <div class="story-panel-text" id="storyPanelText"></div>
+    <p class="story-panel-step" id="storyPanelStep"></p>
+    <div id="storyChoiceRow" class="story-choice-row" hidden>
+      <p id="storyChoicePrompt" class="story-choice-prompt"></p>
+      <button type="button" class="btn big" id="storyChoiceA"></button>
+      <button type="button" class="btn big purple" id="storyChoiceB"></button>
+    </div>
+    <button type="button" class="btn big" id="storyPanelNext">Siguiente 👆</button>
+  </div>
+</section>
+
+<div class="overlay story-reward" id="storyRewardOverlay">
+  <div class="endCard story-reward-card">
+    <p class="story-reward-tag" id="storyRewardTitle">¡Nueva magia!</p>
+    <p class="story-reward-lv" id="storyRewardLvl"></p>
+    <div class="story-reward-icon" id="storyRewardIcon">✨</div>
+    <h3 id="storyRewardName">Lumos</h3>
+    <p id="storyRewardEffect"></p>
+    <button type="button" class="btn big green" id="storyRewardOk">¡Genial!</button>
+  </div>
+</div>
+
 <!-- SELECCIÓN -->
-<section id="selScreen" class="screen show">
+<section id="selScreen" class="screen">
   <div class="titleRow">
     <img class="gameLogo" src="icons/icon.svg" alt="" width="72" height="72" decoding="async">
     <h1 class="title">✨ Tetris Mágico de Hogwarts ✨</h1>
@@ -94,6 +172,7 @@
     <div class="sel-foot glass">
       <p class="vs" id="vsText">¿Quién contra quién?</p>
       <button type="button" class="btn big glow play-magic" id="playBtn" disabled>▶️ Jugar</button>
+      <button type="button" class="btn small purple" id="selToMode">🏠 Modos</button>
     </div>
   </div>
   <div style="height:10px"></div>
@@ -104,6 +183,7 @@
   <div id="topBar">
     <button class="btn small purple" id="backBtn" type="button"><span class="back-ico" aria-hidden="true">🏠</span><span class="back-lbl">Personajes</span></button>
     <div class="ttl">✨ Duelo de Tetris Mágico ✨</div>
+    <p class="story-duel-caption" id="storyDuelCaption" hidden></p>
     <button class="btn small green" id="pauseBtn">⏸️ Pausa</button>
     <button type="button" class="btn small mobile-menu-btn" id="gameMenuBtn" aria-label="Menú" hidden>⚙️</button>
   </div>
@@ -209,6 +289,10 @@
   <div class="endBtns"><button class="btn green" data-again>🔁 Otra vez</button><button class="btn purple" data-menu>🏠 Elegir personajes</button></div>
 </div></div>
 
+<script src="story-profiles.js"></script>
+<script src="stories.js"></script>
+<script src="story-scenes.js"></script>
+<script src="story-mode.js"></script>
 <script>
 "use strict";
 /* ================= DISEÑO RESPONSIVE ================= */
@@ -792,8 +876,12 @@ function startGame(){
  show('gameScreen');hideOv();
  Game.P=mkBoard('p');Game.V=mkBoard('v');Object.assign(Game,{running:true,paused:false,over:false,spellBank:0});
  updateSpellBtn();syncMobileChrome();
- const P=Game.P,V=Game.V;P.hpMax=P.hp=HERO_CFG.hp[h.lv];P.dmgMult=HERO_CFG.dmg[h.lv];P.gravBase=HERO_CFG.grav[h.lv];
- V.dmgMult=VILL_CFG.dmg[v.lv];V.gravBase=VILL_CFG.grav[v.lv];V.cfg={wait:VILL_CFG.wait[v.lv],move:VILL_CFG.move[v.lv],drop:VILL_CFG.drop[v.lv],mis:VILL_CFG.mis[v.lv],range:VILL_CFG.range[v.lv]};
+ const P=Game.P,V=Game.V;
+ const hLv=Game.storyMode&&window.StoryMode?StoryMode.effectiveHeroLv():h.lv;
+ const vLv=Game.storyMode&&window.StoryMode?StoryMode.effectiveHeroLv():v.lv;
+ P.hpMax=P.hp=HERO_CFG.hp[hLv];P.dmgMult=HERO_CFG.dmg[hLv];P.gravBase=HERO_CFG.grav[hLv];
+ V.dmgMult=VILL_CFG.dmg[vLv];V.gravBase=VILL_CFG.grav[vLv];V.cfg={wait:VILL_CFG.wait[vLv],move:VILL_CFG.move[vLv],drop:VILL_CFG.drop[vLv],mis:VILL_CFG.mis[vLv],range:VILL_CFG.range[vLv]};
+ if(Game.storyMode&&window.StoryMode){StoryMode.applyStoryPassives(Game);StoryMode.syncDuelHud?.();}
  if(window.TEST_AUTOPLAY){P.autoplay=true;P.cfg=window.TEST_AUTOPLAY;}
  document.getElementById('pTag').textContent='🧒 ¡Tú! · '+STARS(h.lv);document.getElementById('vTag').textContent='🤖 '+STARS(v.lv);
  setLayout();
@@ -806,7 +894,7 @@ function spawn(B){B.cur=mkPiece(B.next);B.next=nextType(B);B.lockT=0;B.lockReset
  if(collide(B,B.cur.m,B.cur.x,B.cur.y)){B.cur.y--;if(collide(B,B.cur.m,B.cur.x,B.cur.y)){if(isP(B)&&rescue(B))return spawn(B);endGame(B);return false;}}
  drawSide(B);return true;}
 /* Rescate amable: si el tablero del niño se llena, la magia lo limpia (cuesta un poco de vida) */
-function rescue(B){if(Game.over)return false;const cost=Math.round(B.hpMax*.2);B.hp=Math.max(0,B.hp-cost);updateHUD(B);
+function rescue(B){if(Game.over)return false;const cost=window.StoryMode?.storyRescueCost?.(B.hpMax)??Math.round(B.hpMax*.2);B.hp=Math.max(0,B.hp-cost);updateHUD(B);
  const [x,y]=centerOf($s(B,'Av'));popDmg(x,y,'-'+cost,'#ff8aa8');if(B.hp<=0)return false;
  for(let r=0;r<12;r++)B.grid[r]=Array(COLS).fill(null);
  const rc=B.cv.getBoundingClientRect();for(let i=0;i<8;i++)burst(rc.left+rc.width*Math.random(),rc.top+rc.height*.3*Math.random(),14,['#9fe3ff','#fff','#ffd86b'],{speed:3,size:5});
@@ -837,8 +925,10 @@ function clearLines(B,full){const n=full.length;B.flash=full.slice();B.flashT=25
  const frame=B.cv.closest('.boardFrame');if(frame){frame.classList.remove('hit');void frame.offsetWidth;frame.classList.add('hit');setTimeout(()=>frame.classList.remove('hit'),400);}
  if(isP(B)){const gs=document.getElementById('gameScreen');gs.classList.remove('screenShake');void gs.offsetWidth;gs.classList.add('screenShake');setTimeout(()=>gs.classList.remove('screenShake'),420);}
  full.forEach(y=>{const yy=r.top+(y+.5)*(r.height/ROWS);for(let k=0;k<6;k++)burst(r.left+r.width*k/5,yy,2+n*2,isP(B)?theme().concat(['#fff']):VCOL,{speed:2+n,size:3+n*1.5});});
- if(isP(B)&&mobileDuel()){Game.spellBank=Math.min(4,Math.max(1,n));updateSpellBtn();SFX['t'+Math.min(n,4)]();}
- else cast(B,n);
+ const tierN=isP(B)&&Game.storyMode&&window.StoryMode?StoryMode.storyLineTier(n):n;
+ if(isP(B)&&mobileDuel()){Game.spellBank=Math.min(Game.storySpellMax||4,Math.max(1,n));updateSpellBtn();SFX['t'+Math.min(n,4)]();}
+ else cast(B,tierN);
+ if(isP(B)&&Game.storyMode)window.StoryMode?.onStoryLineClear?.();
  if(B.level>oldLvl)setTimeout(()=>{if(!Game.over){showSpell(B,'🏆 ¡Nivel '+B.level+'!',!isP(B));if(isP(B))SFX.level();}},1600);
  updateHUD(B);updateMobileHud();}
 function cast(B,n){const T=TIERS[n],S=T.pool[Math.random()*T.pool.length|0],evil=!isP(B);
@@ -856,7 +946,8 @@ function cast(B,n){const T=TIERS[n],S=T.pool[Math.random()*T.pool.length|0],evil
   for(let i=0;i<10;i++)setTimeout(()=>burst(Math.random()*innerWidth,Math.random()*innerHeight*.7,25,col,{speed:5,size:7}),i*120);}
  setTimeout(()=>{if(Game.over)return;burst(vx,vy,T.n,col.concat(['#ff4d6d']),{speed:3+n*1.5,size:4+n});
   dstAv.classList.remove('shake');void dstAv.offsetWidth;dstAv.classList.add('shake');
-  const dmg=Math.max(1,Math.round(T.dmg*B.dmgMult));tgt.hp=Math.max(0,tgt.hp-dmg);popDmg(vx,vy,'-'+dmg,evil?'#c07bff':'#ffd86b');updateHUD(tgt);SFX.land();
+  const baseDmg=Math.max(1,Math.round(T.dmg*B.dmgMult));
+  const dmg=window.StoryMode?.storyCastDmg?.(baseDmg,B)??baseDmg;tgt.hp=Math.max(0,tgt.hp-dmg);popDmg(vx,vy,'-'+dmg,evil?'#c07bff':'#ffd86b');updateHUD(tgt);SFX.land();
   if(tgt.hp<=0)setTimeout(()=>endGame(tgt),700);},n>=3?1150:480);}
 function popDmg(x,y,t,c){const d=document.createElement('div');d.className='dmgPop';d.textContent=t;d.style.left=x+'px';d.style.top=y+'px';d.style.color=c;document.body.appendChild(d);
  d.animate([{transform:'translate(-50%,-50%) scale(.5)',opacity:0},{transform:'translate(-50%,-110%) scale(1.3)',opacity:1,offset:.3},{transform:'translate(-50%,-220%) scale(1)',opacity:0}],{duration:1300}).onfinish=()=>d.remove();}
@@ -911,6 +1002,7 @@ function update(B,dt){if(!canPlay(B))return;if(B.flashT>0)B.flashT-=dt;
  if(collide(B,B.cur.m,B.cur.x,B.cur.y+1)){B.lockT+=dt;if(B.lockT>=500)lock(B);}else B.lockT=0;}
 function endGame(loser){if(Game.over)return;Game.over=true;Game.running=false;const why=loser.hp<=0?'hp':'top';if(loser===Game.V)win(why);else lose(why);}
 function win(why){const P=Game.P;SFX.win();confetti();setTimeout(confetti,900);
+ if(Game.storyMode&&window.StoryMode){StoryMode.handleStoryWin();return;}
  document.getElementById('winHero').innerHTML=AV[Game.hero.id]();document.getElementById('winVill').innerHTML=AV[Game.vill.id]();
  document.getElementById('winTxt').innerHTML=(why==='hp'?`¡<b>${Game.hero.n}</b> le quitó toda la magia a <b>${Game.vill.n}</b>! 🪄✨`:`¡El tablero de <b>${Game.vill.n}</b> se llenó! ¡<b>${Game.hero.n}</b> gana! 🪄✨`)+`<br>Puntos: <b>${P.score}</b> · Líneas: <b>${P.lines}</b>`;
  document.getElementById('winOv').classList.add('show');}
@@ -921,7 +1013,10 @@ function lose(why){const P=Game.P;SFX.lose();
 function hideOv(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show'));}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('show',s.id===id));}
 function togglePause(){if(!Game.running||Game.over)return;Game.paused=!Game.paused;document.getElementById('pauseOv').classList.toggle('show',Game.paused);SFX.select();}
-function toMenu(){Game.running=false;Game.over=true;hideOv();show('selScreen');}
+function toMenu(){Game.running=false;Game.over=true;hideOv();
+ const story=Game.storyMode;
+ if(story&&window.StoryMode){StoryMode.syncDuelHud?.(false);StoryMode.renderStoryMap();show('storyMapScreen');return;}
+ Game.storyMode=false;StoryMode?.syncDuelHud?.(false);show('modeScreen');}
 document.getElementById('backBtn').onclick=toMenu;
 document.getElementById('pauseBtn').onclick=togglePause;document.getElementById('resumeBtn').onclick=togglePause;
 document.getElementById('mobilePauseBtn')?.addEventListener('click',()=>{togglePause();document.getElementById('mobileGameMenu')?.setAttribute('hidden','');});
@@ -930,13 +1025,13 @@ document.getElementById('mobileMuteBtn')?.addEventListener('click',()=>{muteBtn.
 document.getElementById('mobileMusicBtn')?.addEventListener('click',()=>{musicBtn.click();});
 addEventListener('click',e=>{if(e.target.closest('#mobileGameMenu,#gameMenuBtn'))return;document.getElementById('mobileGameMenu')?.setAttribute('hidden','');});
 syncMobileChrome();
-document.querySelectorAll('[data-again]').forEach(b=>b.onclick=()=>startGame());
+document.querySelectorAll('[data-again]').forEach(b=>b.onclick=()=>{if(Game.storyMode&&Game.storyChapter)StoryMode.startStoryDuel(Game.storyChapter);else startGame();});
 document.querySelectorAll('[data-menu]').forEach(b=>b.onclick=toMenu);
 addEventListener('keydown',e=>{if(!document.getElementById('gameScreen').classList.contains('show'))return;const P=Game.P;
  const map={ArrowLeft:()=>move(P,-1),ArrowRight:()=>move(P,1),ArrowUp:()=>rotate(P,1),ArrowDown:()=>softDrop(P),' ':()=>{if(!e.repeat)hardDrop(P)},
   z:()=>rotate(P,-1),Z:()=>rotate(P,-1),x:()=>rotate(P,1),X:()=>rotate(P,1),c:()=>doHold(P),C:()=>doHold(P),Shift:()=>doHold(P),p:togglePause,P:togglePause,Escape:togglePause};
  if(map[e.key]){e.preventDefault();ac();map[e.key]();}});
-function castSpell(){if(!Game.spellBank||Game.over||!Game.running)return;const n=Game.spellBank;Game.spellBank=0;updateSpellBtn();cast(Game.P,n);}
+function castSpell(){if(!Game.spellBank||Game.over||!Game.running)return;const n=Game.spellBank;Game.spellBank=0;updateSpellBtn();cast(Game.P,n);window.StoryMode?.onManualStorySpell?.();}
 const ACT={left:()=>move(Game.P,-1),right:()=>move(Game.P,1),down:()=>softDrop(Game.P),rot:()=>rotate(Game.P,1),drop:()=>hardDrop(Game.P),hold:()=>doHold(Game.P),pause:togglePause,spell:castSpell};
  document.querySelectorAll('#touch .tbtn, .touch-edge .tbtn, #touchPad .tbtn').forEach(b=>{if(!b.dataset.a)return;let t1,t2;const a=b.dataset.a,rep=['left','right','down'].includes(a);
  const stop=()=>{clearTimeout(t1);clearInterval(t2);};
@@ -955,6 +1050,15 @@ let last=performance.now();
 function loop(now){const dt=Math.min(100,now-last);last=now;
  if(Game.P){for(let k=0;k<(window.SIM_SPEED||1);k++){update(Game.P,dt);update(Game.V,dt);}drawBoard(Game.P,now);drawBoard(Game.V,now);}drawParts();requestAnimationFrame(loop);}
 requestAnimationFrame(loop);
+window.HEROES=HEROES;window.VILLAINS=VILLAINS;window.AV=AV;window.startGame=startGame;
+document.getElementById('selToMode')?.addEventListener('click',()=>{Game.storyMode=false;show('modeScreen');SFX.select();});
+if(typeof ProfileStore?.wireProfileUI==='function')ProfileStore.wireProfileUI();
+if(typeof StoryMode?.wireStoryUI==='function')StoryMode.wireStoryUI();
+window.pickNormalMode=()=>{Game.storyMode=false;show('selScreen');SFX.select();};
+window.pickStoryMode=()=>{SFX.select();StoryMode?.openStoryEntry?.();};
+document.getElementById('btnModeNormal')?.addEventListener('click',()=>window.pickNormalMode());
+document.getElementById('btnModeStory')?.addEventListener('click',()=>window.pickStoryMode());
+show('modeScreen');
 setLayout();
 </script>
 </body>
