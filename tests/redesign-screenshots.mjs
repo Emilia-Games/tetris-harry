@@ -25,11 +25,26 @@ function rectsOverlap(a, b) {
   return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
 }
 
+async function enterNormalMode(page) {
+  await page.waitForSelector('#modeScreen, #selScreen', { timeout: 15000 });
+  if (await page.locator('#modeScreen.show').count()) {
+    await page.locator('#btnModeNormal').click();
+    await page.waitForFunction(
+      () => document.getElementById('selScreen')?.classList.contains('show'),
+      null,
+      { timeout: 15000 }
+    );
+  }
+}
+
 async function prep(page) {
   await page.addInitScript(() => {
     localStorage.setItem('thp_music', 'off');
+    localStorage.removeItem('thp_story_v1');
+    localStorage.removeItem('thp_profiles_v2');
   });
   await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
+  await enterNormalMode(page);
 }
 
 async function startDuel(page) {
@@ -248,6 +263,99 @@ for (const s of sizes) {
   await ctx.close();
 }
 
+const storySizes = [
+  { name: '390x844', width: 390, height: 844, touch: true },
+  { name: '844x390', width: 844, height: 390, touch: true },
+  { name: '1180x820', width: 1180, height: 820, touch: true },
+  { name: '1440x900', width: 1440, height: 900, touch: false },
+];
+const storyDir = join(outDir, 'story');
+mkdirSync(storyDir, { recursive: true });
+
+for (const s of storySizes) {
+  const ctx = await browser.newContext({
+    viewport: { width: s.width, height: s.height },
+    hasTouch: s.touch !== false,
+    isMobile: s.touch !== false,
+  });
+  const page = await ctx.newPage();
+  await page.addInitScript(() => localStorage.setItem('thp_music', 'off'));
+  await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
+  await page.screenshot({ path: join(storyDir, `${s.name}-mode.png`) });
+  await page.click('#btnModeStory');
+  await page.waitForSelector('#profileScreen.show', { timeout: 10000 });
+  await page.screenshot({ path: join(storyDir, `${s.name}-profile.png`) });
+  await page.evaluate(() => {
+    const p = window.ProfileStore.createProfile('Emilia');
+    window.StoryMode.onProfilePicked(p);
+  });
+  await page.waitForFunction(
+    () =>
+      document.getElementById('storyHeroScreen')?.classList.contains('show') ||
+      document.getElementById('storyMapScreen')?.classList.contains('show'),
+    null,
+    { timeout: 20000 }
+  );
+  if (await page.locator('#storyHeroScreen.show').count()) {
+    await page.evaluate(() => document.querySelector('#storyHeroCards .card')?.click());
+    await page.click('#storyMapContinue');
+    await page.waitForSelector('#storyMapScreen.show', { timeout: 15000 });
+  }
+  await page.evaluate(() => {
+    const prog = window.ProfileStore.getProgress();
+    prog.completedNodes = ['n01', 'n02'];
+    prog.nodeId = 'n03';
+    window.ProfileStore.setProgress(prog);
+  });
+  await page.screenshot({ path: join(storyDir, `${s.name}-story-map.png`) });
+  await page.evaluate(() => StoryMode.startNodeFlow('n03'));
+  await page.waitForSelector('#storyPanelScreen.show', { timeout: 5000 });
+  await page.waitForSelector('#storyChoiceRow:not([hidden])', { timeout: 5000 });
+  await page.screenshot({ path: join(storyDir, `${s.name}-story-choice.png`) });
+  await page.evaluate(() => {
+    StoryMode.showStoryPanels(
+      [{ art: 'tunnel', lines: ['Emilia, un cuento especial comienza.', 'Toca siguiente para seguir.'] }],
+      () => {}
+    );
+  });
+  await page.waitForSelector('#storyPanelScreen.show', { timeout: 5000 });
+  await page.screenshot({ path: join(storyDir, `${s.name}-story-scene.png`) });
+  await page.evaluate(() => {
+    document.querySelectorAll('.screen').forEach((el) => el.classList.remove('show'));
+    const card = document.getElementById('storyRewardOverlay');
+    card.classList.add('show');
+    document.getElementById('storyRewardTitle').textContent = '¡Nueva magia!';
+    document.getElementById('storyRewardIcon').textContent = '💡';
+    document.getElementById('storyRewardName').textContent = 'Lumos';
+    document.getElementById('storyRewardEffect').textContent =
+      'Cada línea te da un poquito de magia (+3 vida).';
+    document.getElementById('storyRewardLvl').textContent = '¡Nivel 2!';
+  });
+  await page.screenshot({ path: join(storyDir, `${s.name}-story-reward.png`) });
+  await page.evaluate(() => {
+    document.getElementById('storyRewardOverlay').classList.remove('show');
+    StoryMode.startStoryDuel({
+      id: 'n05f',
+      villainId: 'goyle',
+      bossName: 'Un troll torpe',
+      spell: 'lumos',
+      rewardTitle: '¡Nueva magia!',
+      intro: [{ art: 'troll', lines: ['¡Duelo de prueba!'] }],
+      outro: [{ art: 'victory', lines: ['¡Ganaste!'] }],
+    });
+  });
+  await page.waitForSelector('#gameScreen.show', { timeout: 15000 });
+  await page.waitForTimeout(4000);
+  await page.evaluate(async () => {
+    window.fitBoards?.();
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    window.fitBoards?.();
+  });
+  await assertLayout(page, s.name, 'story-duel', null);
+  await page.screenshot({ path: join(storyDir, `${s.name}-story-duel.png`) });
+  await ctx.close();
+}
+
 await browser.close();
 const flat = errors.filter((e) => typeof e === 'string' && e.length > 0);
 const n = sizes.length * 2;
@@ -267,4 +375,5 @@ if (flat.length) {
   console.error(flat.join('\n'));
   process.exit(1);
 }
-console.log(`\nOK — aserciones de layout (${n} capturas)`);
+console.log(`\nCapturas historia en ${storyDir} (${storySizes.length * 7} imágenes)`);
+console.log(`\nOK — aserciones de layout (${n} capturas + historia)`);
