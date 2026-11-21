@@ -140,6 +140,22 @@ function assertLayout(page, name, phase, minCell) {
             );
           }
         }
+        if (layout === 'phone-l' && label.endsWith('-duel')) {
+          const hud = document.getElementById('mobileHudScore');
+          if (hud && !hud.hasAttribute('hidden')) {
+            const hr = hud.getBoundingClientRect();
+            for (const id of ['backBtn', 'gameMenuBtn']) {
+              const btn = document.getElementById(id);
+              if (!btn) continue;
+              const br = btn.getBoundingClientRect();
+              if (intersects(hr, br)) {
+                issues.push(
+                  `${label}: HUD solapa #${id} (HUD ${hr.left.toFixed(0)}-${hr.right.toFixed(0)} vs btn ${br.left.toFixed(0)}-${br.right.toFixed(0)})`
+                );
+              }
+            }
+          }
+        }
         if (iw > ih) {
           const frames = ['pFrame', 'vFrame']
             .map((id) => document.getElementById(id)?.getBoundingClientRect())

@@ -1095,6 +1095,10 @@ body[data-layout="phone-p"] .boardStage > .mini.flank canvas {
 }
 body[data-layout="phone-p"] .spellText,
 body[data-layout="phone-p"] .spellText.t4 { max-width: 92vw; width: auto; white-space: normal; text-align: center; }
+body[data-layout="phone-p"] .sideWrap.player .sideRow {
+  flex: 1 1 0;
+  min-height: 0;
+}
 body[data-layout="phone-p"] .sideWrap.player .boardCol {
   flex: 1 1 auto;
   width: auto;
@@ -1104,7 +1108,7 @@ body[data-layout="phone-p"] .sideWrap.player .boardCol {
   max-height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
   overflow: visible;
 }
 body[data-layout="phone-p"] .sideWrap.player .boardFrame {
@@ -1231,12 +1235,35 @@ body[data-layout="phone-l"] .sideWrap.rival .rival-mini {
 }
 
 /* Landscape táctil ancho (iPad…): columnas laterales, sin dock inferior */
-body[data-layout="touch-l"] #gameScreen.show,
-body[data-layout="phone-l"] #gameScreen.show {
+body[data-layout="touch-l"] #gameScreen.show {
   grid-template-rows: auto 1fr;
   grid-template-areas: "topbar" "arena";
   height: 100%;
   max-height: 100%;
+}
+body[data-layout="phone-l"] #gameScreen.show {
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas: "topbar" "mhud" "arena";
+  height: 100%;
+  max-height: 100%;
+}
+body[data-layout="phone-l"] #topBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 4px calc(8px + var(--safe-r)) 2px calc(8px + var(--safe-l));
+  grid-area: topbar;
+  gap: 8px;
+}
+body[data-layout="phone-l"] #gameMenuBtn {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  padding: 0;
+  border-radius: 50%;
+  margin-left: auto;
 }
 body[data-layout="touch-l"] #gameScreen #touchDock,
 body[data-layout="touch-l"] #touch,
@@ -1407,3 +1434,359 @@ body[data-layout="touch-l"] .pad-actions {
   box-shadow: inset 0 0 0 1px rgba(255, 216, 107, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .side { position: relative; }
+
+/* Pie de selección (Jugar) — columna central en desktop/tablet */
+body:not([data-layout="phone-p"]):not([data-layout="phone-l"]) .sel-foot {
+  grid-column: 2;
+  width: 100%;
+  max-width: 380px;
+  justify-self: center;
+  text-align: center;
+  padding: 10px 14px;
+  margin-top: 4px;
+  border-radius: var(--radius-lg);
+}
+
+/* ===== Móvil minimalista (solo phone-p / phone-l) ===== */
+body[data-layout="phone-p"] #selScreen .subtitle,
+body[data-layout="phone-l"] #selScreen .subtitle,
+body[data-layout="phone-p"] #lvlFilter,
+body[data-layout="phone-l"] #lvlFilter,
+body[data-layout="phone-p"] .lvTip,
+body[data-layout="phone-l"] .lvTip,
+body[data-layout="phone-p"] #selWrap .side h2,
+body[data-layout="phone-l"] #selWrap .side h2,
+body[data-layout="phone-p"] #selWrap .center .box h3,
+body[data-layout="phone-l"] #selWrap .center .box h3,
+body[data-layout="phone-p"] #selWrap .help,
+body[data-layout="phone-l"] #selWrap .help,
+body[data-layout="phone-p"] #selDesc,
+body[data-layout="phone-l"] #selDesc,
+body[data-layout="phone-p"] .card .stars,
+body[data-layout="phone-l"] .card .stars,
+body[data-layout="phone-p"] h1.title,
+body[data-layout="phone-l"] h1.title {
+  display: none !important;
+}
+body[data-layout="phone-p"] #selScreen.show,
+body[data-layout="phone-l"] #selScreen.show {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  height: 100%;
+  max-height: 100dvh;
+  padding: 0 10px calc(4px + var(--safe-b));
+}
+body[data-layout="phone-p"] .titleRow,
+body[data-layout="phone-l"] .titleRow {
+  flex: 0 0 auto;
+  justify-content: flex-start;
+  margin: calc(6px + var(--safe-t)) 0 4px;
+  padding: 0 calc(96px + var(--safe-r)) 0 calc(4px + var(--safe-l));
+  min-height: 48px;
+}
+body[data-layout="phone-p"] .gameLogo,
+body[data-layout="phone-l"] .gameLogo {
+  width: 48px;
+  height: 48px;
+}
+body[data-layout="phone-p"] #muteBtn,
+body[data-layout="phone-p"] #musicBtn,
+body[data-layout="phone-l"] #muteBtn,
+body[data-layout="phone-l"] #musicBtn {
+  width: 44px;
+  height: 44px;
+  font-size: 1.1rem;
+  top: calc(8px + var(--safe-t));
+}
+body[data-layout="phone-p"] #musicBtn,
+body[data-layout="phone-l"] #musicBtn { right: calc(56px + var(--safe-r)); }
+body[data-layout="phone-p"] #muteBtn,
+body[data-layout="phone-l"] #muteBtn { right: calc(8px + var(--safe-r)); }
+body[data-layout="phone-p"] #selTabs,
+body[data-layout="phone-l"] #selTabs {
+  flex: 0 0 auto;
+  margin-bottom: 6px;
+}
+body[data-layout="phone-p"] #selWrap,
+body[data-layout="phone-l"] #selWrap {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 8px;
+  padding: 0;
+}
+body[data-layout="phone-p"] #selWrap .side:not([hidden]),
+body[data-layout="phone-l"] #selWrap .side:not([hidden]) {
+  order: 1;
+  flex: 1 1 auto;
+  min-height: 160px;
+  max-height: min(48vh, 420px);
+  padding: 8px;
+}
+body[data-layout="phone-p"] #selWrap .center,
+body[data-layout="phone-l"] #selWrap .center {
+  order: 2;
+  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+body[data-layout="phone-p"] #selWrap .sel-foot,
+body[data-layout="phone-l"] #selWrap .sel-foot {
+  order: 3;
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  width: 100%;
+  margin-top: auto;
+  padding: 10px 12px calc(10px + var(--safe-b));
+  background: linear-gradient(0deg, rgba(10, 8, 36, 0.98) 55%, rgba(10, 8, 36, 0.75) 85%, transparent);
+  border: none;
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+}
+body[data-layout="phone-p"] #heroCards,
+body[data-layout="phone-p"] #villainCards,
+body[data-layout="phone-l"] #heroCards,
+body[data-layout="phone-l"] #villainCards {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-content: start;
+}
+body[data-layout="phone-p"] .lvRow,
+body[data-layout="phone-l"] .lvRow {
+  display: contents;
+}
+body[data-layout="phone-p"] .lvLbl,
+body[data-layout="phone-l"] .lvLbl { display: none !important; }
+body[data-layout="phone-p"] .lvCards,
+body[data-layout="phone-l"] .lvCards {
+  display: contents;
+}
+body[data-layout="phone-p"] #heroCards .card,
+body[data-layout="phone-p"] #villainCards .card,
+body[data-layout="phone-l"] #heroCards .card,
+body[data-layout="phone-l"] #villainCards .card {
+  padding: 12px 8px 10px;
+  min-height: 118px;
+  width: 100%;
+}
+body[data-layout="phone-p"] #heroCards .card svg,
+body[data-layout="phone-p"] #villainCards .card svg,
+body[data-layout="phone-l"] #heroCards .card svg,
+body[data-layout="phone-l"] #villainCards .card svg {
+  width: min(88px, 34vw, 92%) !important;
+}
+body[data-layout="phone-p"] .card .nm,
+body[data-layout="phone-l"] .card .nm {
+  font-size: clamp(0.72rem, 3.2vw, 0.85rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+body[data-layout="phone-p"] #selWrap .center .box,
+body[data-layout="phone-l"] #selWrap .center .box {
+  background: transparent;
+  border: none;
+  padding: 4px 0 8px;
+}
+body[data-layout="phone-p"] #themes,
+body[data-layout="phone-l"] #themes {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 4px 0;
+}
+body[data-layout="phone-p"] #themes .theme span,
+body[data-layout="phone-l"] #themes .theme span { display: none !important; }
+body[data-layout="phone-p"] #themes .theme,
+body[data-layout="phone-l"] #themes .theme {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 3px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+body[data-layout="phone-p"] #themes .theme.sel,
+body[data-layout="phone-l"] #themes .theme.sel {
+  box-shadow: 0 0 0 3px var(--gold), 0 0 16px rgba(255, 216, 107, 0.65);
+  transform: scale(1.06);
+}
+body[data-layout="phone-p"] #themes .theme canvas,
+body[data-layout="phone-l"] #themes .theme canvas {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50%;
+  margin: 0;
+  pointer-events: none;
+}
+body[data-layout="phone-p"] #playBtn,
+body[data-layout="phone-l"] #playBtn {
+  font-size: clamp(1.2rem, 5vw, 1.5rem);
+  padding: 16px 24px;
+  width: 100%;
+  max-width: 360px;
+  margin: 4px auto 0;
+}
+body[data-layout="phone-p"] #vsText,
+body[data-layout="phone-l"] #vsText {
+  font-size: 1rem;
+  margin: 0 0 4px;
+}
+
+body[data-layout="phone-p"] #topBar .ttl,
+body[data-layout="phone-l"] #topBar .ttl,
+body[data-layout="phone-p"] #pauseBtn,
+body[data-layout="phone-l"] #pauseBtn { display: none !important; }
+body[data-layout="phone-p"] #backBtn,
+body[data-layout="phone-l"] #backBtn {
+  font-size: 1.2rem;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 48px;
+}
+body[data-layout="phone-p"] #backBtn .back-lbl,
+body[data-layout="phone-l"] #backBtn .back-lbl { display: none; }
+body[data-layout="phone-p"] #backBtn .back-ico,
+body[data-layout="phone-l"] #backBtn .back-ico { line-height: 1; }
+body[data-layout="phone-p"] #gameMenuBtn,
+body[data-layout="phone-l"] #gameMenuBtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 1.2rem;
+  padding: 8px 12px;
+}
+body[data-layout="phone-p"]:has(#gameScreen.show) #muteBtn,
+body[data-layout="phone-p"]:has(#gameScreen.show) #musicBtn,
+body[data-layout="phone-l"]:has(#gameScreen.show) #muteBtn,
+body[data-layout="phone-l"]:has(#gameScreen.show) #musicBtn {
+  display: none !important;
+}
+body[data-layout="phone-p"] .mobile-hud-score:not([hidden]),
+body[data-layout="phone-l"] .mobile-hud-score:not([hidden]) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 12px 4px;
+  font-size: clamp(0.72rem, 3.2vw, 0.85rem);
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 1px 0 #2b1650;
+  pointer-events: none;
+}
+body[data-layout="phone-p"] #gameScreen.show {
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas: "topbar" "mhud" "arena" "dock";
+}
+body[data-layout="phone-p"] .mobile-hud-score:not([hidden]),
+body[data-layout="phone-l"] .mobile-hud-score:not([hidden]) {
+  grid-area: mhud;
+  margin-top: 0;
+}
+.mobile-game-menu {
+  position: fixed;
+  top: calc(52px + var(--safe-t));
+  right: calc(10px + var(--safe-r));
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  background: rgba(12, 8, 40, 0.95);
+  border: 2px solid rgba(255, 216, 107, 0.5);
+  box-shadow: var(--shadow-soft);
+  min-width: 140px;
+}
+.mobile-game-menu[hidden] { display: none !important; }
+.mobile-game-menu .btn { width: 100%; justify-content: center; min-height: 44px; }
+
+body[data-layout="phone-l"] .sideWrap .panel .pname,
+body[data-layout="phone-l"] .sideWrap .panel .tag,
+body[data-layout="phone-l"] .sideWrap .panel .stat,
+body[data-layout="phone-l"] .sideWrap .panel .minis,
+body[data-layout="phone-l"] .sideWrap .panel .spellTip,
+body[data-layout="phone-l"] .sideWrap .panel .ghelp {
+  display: none !important;
+}
+body[data-layout="phone-p"] .sideWrap.player .player-panel { display: none !important; }
+body[data-layout="phone-p"] .sideWrap.rival {
+  max-height: 52px;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .hpLabel,
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .hpTxt,
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel #vTag,
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .tag {
+  display: none !important;
+}
+body[data-layout="phone-p"] .sideWrap.rival .rival-panel .hpBar { height: 10px; }
+body[data-layout="phone-p"] .sideWrap.rival .rival-mini {
+  flex: 0 0 46px;
+  width: 46px;
+  min-width: 46px;
+}
+body[data-layout="phone-p"] .vsCol { display: none !important; }
+body[data-layout="phone-p"] .boardStage > .mini.flank span { font-size: 0; }
+body[data-layout="phone-p"] .boardStage > .mini.flank span::after { font-size: 0.55rem; content: "▶"; }
+body[data-layout="phone-p"] .boardStage > .mini.flank:last-child span::after { content: "■"; }
+
+body[data-layout="phone-p"] #touch .tbtn.phone-extra,
+body[data-layout="phone-l"] .touch-edge .tbtn.hold,
+body[data-layout="phone-l"] .touch-edge .tbtn[data-a="pause"],
+body[data-layout="phone-l"] #spellBtnEdge { display: none !important; }
+body[data-layout="phone-p"] #touchDock .tbtn,
+body[data-layout="phone-l"] .touch-edge .tbtn {
+  min-width: 48px;
+  min-height: 48px;
+}
+body[data-layout="phone-p"] #touchDock .tbtn {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+}
+body[data-layout="phone-l"] .touch-edge .tbtn {
+  width: clamp(48px, 11vh, 56px);
+  height: clamp(48px, 11vh, 56px);
+}
+.tbtn.spell {
+  background: linear-gradient(180deg, #b8a0ff, #6b4fd4);
+  box-shadow: 0 5px 0 #3d2a8a;
+  opacity: 0.55;
+}
+.tbtn.spell.ready {
+  opacity: 1;
+  animation: spellReady 1s ease-in-out infinite alternate;
+  box-shadow: 0 0 0 3px rgba(255, 216, 107, 0.65), 0 5px 0 #3d2a8a, 0 0 18px rgba(180, 140, 255, 0.85);
+}
+.tbtn.spell:disabled { pointer-events: none; }
+@keyframes spellReady {
+  from { filter: brightness(1); transform: scale(1); }
+  to { filter: brightness(1.15); transform: scale(1.06); }
+}
