@@ -33,8 +33,10 @@ jobs:
       - name: Preparar solo archivos del juego
         run: |
           set -euo pipefail
+          BUILD_SHA="$(git rev-parse --short HEAD)"
           mkdir -p deploy/screenshots deploy/icons deploy/fonts
-          cp index.html manifest.webmanifest theme.css story-mode.js story-profiles.js stories.js story-scenes.js deploy/
+          sed "s/__THP_BUILD__/${BUILD_SHA}/g" index.html > deploy/index.html
+          cp manifest.webmanifest theme.css story-mode.js story-profiles.js stories.js story-scenes.js deploy/
           # Solo imágenes sueltas del README (p. ej. selection.png); no screenshots/responsive/ del PR.
           shopt -s nullglob
           for asset in screenshots/*.png screenshots/*.jpg screenshots/*.jpeg screenshots/*.webp; do
