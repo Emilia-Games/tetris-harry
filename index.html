@@ -664,6 +664,7 @@ function centerOf(el){const r=el.getBoundingClientRect();return [r.left+r.width/
 
 /* ================= PANTALLA DE SELECCIÓN ================= */
 const sel={hero:null,villain:null,theme:'arcoiris'};
+window.sel=sel;
 function shortCharName(ch){
  if(ch.id==='molly')return 'Molly';
  if(ch.id==='arthur')return 'Arthur';
@@ -870,7 +871,16 @@ addEventListener('resize',onViewportChange);addEventListener('orientationchange'
 if(window.visualViewport){visualViewport.addEventListener('resize',onViewportChange);visualViewport.addEventListener('scroll',onViewportChange);}
 
 function startGame(){
- const h=HEROES.find(x=>x.id===sel.hero),v=VILLAINS.find(x=>x.id===sel.villain);Game.hero=h;Game.vill=v;
+ let heroId=sel.hero,villId=sel.villain;
+ if((!heroId||!villId)&&Game.storyMode&&Game.storyChapter&&window.StoryMode){
+  const prog=StoryMode.loadProgress?.();
+  heroId=heroId||prog?.heroId;
+  villId=villId||Game.storyChapter.villainId;
+  sel.hero=heroId;sel.villain=villId;
+ }
+ const h=HEROES.find(x=>x.id===heroId),v=VILLAINS.find(x=>x.id===villId);
+ if(!h||!v){console.error('startGame: sin héroe o rival',heroId,villId);return;}
+ Game.hero=h;Game.vill=v;
  document.getElementById('pAv').innerHTML=AV[h.id]();document.getElementById('vAv').innerHTML=AV[v.id]();
  document.getElementById('pName').textContent=h.n;document.getElementById('vName').textContent=v.n;
  show('gameScreen');hideOv();
@@ -1015,7 +1025,7 @@ function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.to
 function togglePause(){if(!Game.running||Game.over)return;Game.paused=!Game.paused;document.getElementById('pauseOv').classList.toggle('show',Game.paused);SFX.select();}
 function toMenu(){Game.running=false;Game.over=true;hideOv();
  const story=Game.storyMode;
- if(story&&window.StoryMode){StoryMode.syncDuelHud?.(false);StoryMode.renderStoryMap();show('storyMapScreen');return;}
+ if(story&&window.StoryMode){Game.storyMode=false;StoryMode.syncDuelHud?.(false);StoryMode.renderStoryMap();show('storyMapScreen');return;}
  Game.storyMode=false;StoryMode?.syncDuelHud?.(false);show('modeScreen');}
 document.getElementById('backBtn').onclick=toMenu;
 document.getElementById('pauseBtn').onclick=togglePause;document.getElementById('resumeBtn').onclick=togglePause;
