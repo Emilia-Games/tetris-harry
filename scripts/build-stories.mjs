@@ -88,6 +88,35 @@ const GRAPH_NODES = {
   },
 };
 
+/** Villano y recompensa por episodio del mapa (narrativa + duelo). */
+const STORY_NODE_BATTLE = {
+  n01: { villainId: "crabbe" },
+  n02: { villainId: "goyle" },
+  n04f: { villainId: "goyle", spell: "lumos", rewardTitle: "¡Nueva magia!" },
+  n04l: { villainId: "crabbe", spell: "lumos", rewardTitle: "¡Nueva magia!" },
+  n05f: { villainId: "goyle", spell: "lumos", rewardTitle: "¡Nueva magia!" },
+  n05l: { villainId: "crabbe", spell: "lumos", rewardTitle: "¡Nueva magia!" },
+  n06: { villainId: "colagusano", displayName: "Peter Pettigrew" },
+  n07: { villainId: "draco" },
+  n09: { villainId: "draco", spell: "expelliarmus", rewardTitle: "¡Nueva magia!" },
+  n10t: { villainId: "draco", spell: "expelliarmus", rewardTitle: "¡Nueva magia!" },
+  n10p: { villainId: "colagusano", displayName: "Peter Pettigrew", spell: "expelliarmus", rewardTitle: "¡Nueva magia!" },
+  n11: { villainId: "mortifagos" },
+  n12: { villainId: "quirrell", spell: "protego", rewardTitle: "¡Subiste de nivel!" },
+  n13: { villainId: "umbridge" },
+  n15: { villainId: "basilisco", spell: "patronus", rewardTitle: "¡Nueva magia!" },
+  n16a: { villainId: "basilisco", spell: "patronus", rewardTitle: "¡Nueva magia!" },
+  n16b: { villainId: "dementor", spell: "patronus", rewardTitle: "¡Nueva magia!" },
+  n17: { villainId: "dementor" },
+  n18: { villainId: "snape", spell: "stupefy", rewardTitle: "¡Nueva magia!" },
+  n19: { villainId: "bellatrix" },
+  n20: { villainId: "bellatrix", spell: "reparo", rewardTitle: "¡Subiste de nivel!" },
+  n21: { villainId: "lucius" },
+  n22: { villainId: "lucius", spell: "reducto", rewardTitle: "¡Nueva magia!" },
+  n23: { villainId: "lucius" },
+  n24: { villainId: "voldemort", spell: "aguamenti", rewardTitle: "¡Historia completada!", finale: true },
+};
+
 const MAP_ORDER = [
   "n01",
   "n02",
@@ -144,6 +173,7 @@ const out = `/* Generado por scripts/build-stories.mjs — no editar a mano */
 window.StoryData = ${JSON.stringify(
   {
     STORY_SPELLS,
+    STORY_NODE_BATTLE,
     GRAPH_NODES,
     MAP_ORDER,
     MASTER_STORIES,

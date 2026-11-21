@@ -117,6 +117,21 @@
   </div>
 </section>
 
+<div class="overlay story-duel-intro" id="storyDuelIntroOverlay">
+  <div class="endCard story-duel-intro-card glass-gold">
+    <p class="story-duel-intro-tag">⚔️ Duelo de Tetris</p>
+    <h2 id="storyDuelIntroTitle">¡Duelo contra el rival!</h2>
+    <p class="story-duel-intro-sub" id="storyDuelIntroSub"></p>
+    <div class="endAv story-duel-intro-av">
+      <div id="storyDuelIntroHero"></div>
+      <span class="story-duel-vs" aria-hidden="true">⚡ VS ⚡</span>
+      <div id="storyDuelIntroVillain"></div>
+    </div>
+    <button type="button" class="btn big green glow" id="storyDuelStartBtn">⚔️ ¡A la batalla!</button>
+    <button type="button" class="btn small purple" id="storyDuelIntroBack">🗺️ Volver al mapa</button>
+  </div>
+</div>
+
 <div class="overlay story-reward" id="storyRewardOverlay">
   <div class="endCard story-reward-card">
     <p class="story-reward-tag" id="storyRewardTitle">¡Nueva magia!</p>
@@ -491,6 +506,10 @@ const AV={
    `<path d="M35 45 L46 48 M65 45 L54 48" stroke="#141018" stroke-width="2.4" stroke-linecap="round"/>`+
    `<ellipse cx="41" cy="52" rx="5" ry="4" fill="#fff"/><ellipse cx="59" cy="52" rx="5" ry="4" fill="#fff"/><circle cx="41" cy="52" r="2.6" fill="#3a2a1a"/><circle cx="59" cy="52" r="2.6" fill="#3a2a1a"/>`+
    `<path d="M42 62 Q50 69 58 62 Q50 65 42 62Z" fill="#8b0f2e" stroke="#8b0f2e" stroke-width="2"/>`),
+ umbridge:()=>svg('#ffd6e8',robe('#2b2b3a','#7a1a45','#c0c7cf')+head('#f8e4d0')+
+   `<path d="M28 44 Q30 22 50 23 Q70 22 72 44 Q66 32 50 34 Q34 32 28 44Z" fill="#8b5a5a"/>`+eyesGood()+nose+
+   `<path d="M42 62 Q50 66 58 62" stroke="#a0453a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`+
+   `<path d="M58 70 L64 78 L58 86 L52 78 Z" fill="#ff8ab8" stroke="#7a1a45" stroke-width="1.5"/>`),
  draco:()=>svg('#7dd8a0',robe('#2b2b3a','#1a7a3f','#c0c7cf')+head()+
    `<path d="M27 46 Q25 23 50 23 Q75 23 73 46 Q72 34 60 32 Q44 30 34 36 Q29 40 27 46Z" fill="#f3ecc8"/>`+
    `<path d="M35 45 L46 47 M65 45 L54 47" stroke="#c8b98a" stroke-width="2.4" stroke-linecap="round"/>`+
@@ -539,6 +558,7 @@ const VILLAINS=[
  {id:'draco',lv:2,n:'Draco Malfoy',d:'El rival de Slytherin',sp:['¡Rictusempra!','¡Levicorpus!']},
  {id:'mortifagos',lv:2,n:'Mortífagos',d:'La pandilla enmascarada',sp:['¡Densaugeo!','¡Locomotor Mortis!']},
  {id:'quirrell',lv:3,n:'Prof. Quirrell',d:'El del turbante morado',sp:['¡Incarcerous!','¡T-t-truco!']},
+ {id:'umbridge',lv:3,n:'Dolores Umbridge',d:'La directora estricta',sp:['¡Educado!','¡Detención!']},
  {id:'lucius',lv:3,n:'Lucius Malfoy',d:'El mago orgulloso',sp:['¡Confundus!','¡Levicorpus!']},
  {id:'moody',lv:3,n:'Ojoloco Moody',d:'¡Alerta permanente!',sp:['¡Alerta permanente!','¡Impedimenta!']},
  {id:'snape',lv:4,n:'Severus Snape',d:'El maestro de pociones',sp:['¡Poción misteriosa!','¡Levicorpus!']},

@@ -86,14 +86,28 @@ function personalize(lines) {
   )[0].lines;
 }
 
+function resolveChapterBattle(nodeId) {
+  const meta = nodeMeta(nodeId);
+  const battle = data().STORY_NODE_BATTLE?.[nodeId] || {};
+  const villainId = meta?.villainId || battle.villainId;
+  if (!villainId) return null;
+  return {
+    villainId,
+    spell: meta?.spell || battle.spell,
+    rewardTitle: meta?.rewardTitle || battle.rewardTitle,
+    finale: !!(meta?.finale || battle.finale),
+    displayName: battle.displayName,
+  };
+}
+
 function panelSceneMeta(nodeId) {
   const p = loadStoryProgress();
-  const meta = nodeMeta(nodeId);
   const c = heroContent(nodeId);
+  const battle = resolveChapterBattle(nodeId);
   return {
     heroId: p.heroId,
-    villainId: meta?.villainId,
-    bossName: c?.bossName,
+    villainId: battle?.villainId,
+    bossName: c?.bossName || battle?.displayName,
   };
 }
 
@@ -126,16 +140,38 @@ function canEnterNode(nodeId, p) {
   return nodeId === cur;
 }
 
-/** Avanza solo desde el episodio activo (narrativa / elección). Los duelos usan handleStoryWin. */
+/** Solo nodos sin combate (p. ej. elección pura). El resto avanza en handleStoryWin. */
 function completeNarrativeNode(nodeId) {
   const p = loadStoryProgress();
   const meta = nodeMeta(nodeId);
-  if (!meta || meta.type === "duel") return;
+  if (!meta || meta.type === "duel" || resolveChapterBattle(nodeId)) return;
   const cur = p.nodeId || data().START_NODE || "n01";
   if (nodeId !== cur) return;
   if (!p.completedNodes.includes(nodeId)) p.completedNodes.push(nodeId);
   if (meta.next) p.nodeId = meta.next;
   saveProgress();
+}
+
+function shouldAutoSkipBattleNode(wonId, candidateId) {
+  const won = resolveChapterBattle(wonId);
+  const cand = resolveChapterBattle(candidateId);
+  const cm = nodeMeta(candidateId);
+  return (
+    !!won?.villainId &&
+    !!cand?.villainId &&
+    won.villainId === cand.villainId &&
+    cm?.type === "duel"
+  );
+}
+
+function nextChapterAfterWin(nodeId) {
+  let next = nodeMeta(nodeId)?.next;
+  const p = loadStoryProgress();
+  while (next && shouldAutoSkipBattleNode(nodeId, next)) {
+    if (!p.completedNodes.includes(next)) p.completedNodes.push(next);
+    next = nodeMeta(next)?.next;
+  }
+  return next;
 }
 
 function pathUsesNode(nodeId, branches) {
@@ -337,7 +373,15 @@ function renderStoryMap() {
       (done ? " done" : "") +
       (current ? " current" : "") +
       (meta?.type === "choice" ? " story-choice-node" : "");
-    const boss = c?.bossName || (meta?.type === "duel" ? "Duelo" : meta?.type === "choice" ? "Decisión" : "Cuento");
+    const battle = resolveChapterBattle(nodeId);
+    const vRec = battle
+      ? window.VILLAINS?.find((v) => v.id === battle.villainId)
+      : null;
+    const boss =
+      c?.bossName ||
+      battle?.displayName ||
+      vRec?.n ||
+      (meta?.type === "choice" ? "Decisión" : meta?.type === "duel" ? "Duelo" : "Cuento");
     node.innerHTML = `<span class="story-node-num">${idx}</span><span class="story-node-t">${c?.title || nodeId}</span><span class="story-node-b">${boss}</span>`;
     if (!locked) {
       const id = nodeId;
@@ -360,15 +404,18 @@ function isNextUnlocked(nodeId, p) {
 
 function buildDuelChapter(nodeId) {
   const c = heroContent(nodeId);
-  const meta = nodeMeta(nodeId);
+  const battle = resolveChapterBattle(nodeId);
+  if (!battle) return null;
+  const vill = window.VILLAINS.find((v) => v.id === battle.villainId);
+  const bossName =
+    c?.bossName || battle.displayName || vill?.n || battle.villainId;
   return {
     id: nodeId,
     title: c?.title || nodeId,
-    villainId: meta.villainId,
-    bossName: c?.bossName || meta.villainId,
-    spell: meta.spell,
-    rewardTitle: meta.rewardTitle,
-    intro: panelsFrom(nodeId),
+    villainId: battle.villainId,
+    bossName,
+    spell: battle.spell,
+    rewardTitle: battle.rewardTitle,
     outro: [
       {
         art: "victory",
@@ -378,8 +425,41 @@ function buildDuelChapter(nodeId) {
         ]),
       },
     ],
-    finale: !!meta.finale,
+    finale: !!battle.finale,
   };
+}
+
+function showStoryDuelIntro(nodeId, battle, onStart) {
+  const p = loadStoryProgress();
+  const hero = window.HEROES.find((h) => h.id === p.heroId);
+  const vill = window.VILLAINS.find((v) => v.id === battle.villainId);
+  const name = battle.displayName || vill?.n || battle.villainId;
+  const c = heroContent(nodeId);
+  document.getElementById("storyDuelIntroTitle").textContent =
+    `¡Duelo contra ${name}!`;
+  document.getElementById("storyDuelIntroSub").textContent =
+    c?.title
+      ? `${c.title} — completa filas para lanzar hechizos y vaciar la magia del rival.`
+      : "Completa filas para lanzar hechizos y vaciar la magia del rival.";
+  document.getElementById("storyDuelIntroHero").innerHTML =
+    hero && window.AV ? window.AV[hero.id]() : "";
+  document.getElementById("storyDuelIntroVillain").innerHTML =
+    vill && window.AV ? window.AV[vill.id]() : "";
+  Story._duelIntroCb = onStart;
+  document.getElementById("storyDuelIntroOverlay").classList.add("show");
+}
+
+function beginChapterBattle(nodeId) {
+  const battle = resolveChapterBattle(nodeId);
+  if (!battle?.villainId) {
+    completeNarrativeNode(nodeId);
+    renderStoryMap();
+    show("storyMapScreen");
+    return;
+  }
+  const chapter = buildDuelChapter(nodeId);
+  if (!chapter) return;
+  showStoryDuelIntro(nodeId, battle, () => startStoryDuel(chapter));
 }
 
 function startNodeFlow(nodeId) {
@@ -406,8 +486,8 @@ function startNodeFlow(nodeId) {
     showChoiceUI(nodeId);
     return;
   }
-  if (meta.type === "duel") {
-    showStoryPanels(panelsFrom(nodeId), () => startStoryDuel(buildDuelChapter(nodeId)));
+  if (meta.type === "narrative" || meta.type === "duel") {
+    showStoryPanels(panelsFrom(nodeId), () => beginChapterBattle(nodeId));
     return;
   }
   showStoryPanels(panelsFrom(nodeId), () => {
@@ -418,6 +498,7 @@ function startNodeFlow(nodeId) {
 }
 
 function showStoryPanels(panels, done) {
+  document.getElementById("storyDuelIntroOverlay")?.classList.remove("show");
   hideChoiceUI();
   Story.panelQueue = panels.slice();
   Story.panelIdx = 0;
@@ -511,14 +592,29 @@ function handleStoryWin() {
   p.wins = (p.wins || 0) + 1;
   if (ch.spell && !p.spells.includes(ch.spell)) p.spells.push(ch.spell);
   if (!p.completedNodes.includes(ch.id)) p.completedNodes.push(ch.id);
-  const meta = nodeMeta(ch.id);
-  if (ch.finale || meta?.finale) {
+  const next = nextChapterAfterWin(ch.id);
+  if (ch.finale) {
     p.completed = true;
     p.nodeId = null;
-  } else if (meta?.next) p.nodeId = meta.next;
+  } else if (next) p.nodeId = next;
   saveProgress();
-  Story.pendingReward = { chapter: ch, lv: effectiveHeroLv() };
-  showStoryPanels(ch.outro || [], () => showStoryReward());
+  Story.pendingReward =
+    ch.spell || ch.rewardTitle
+      ? { chapter: ch, lv: effectiveHeroLv() }
+      : null;
+  if (ch.outro?.length) {
+    showStoryPanels(ch.outro, () => {
+      if (Story.pendingReward) showStoryReward();
+      else {
+        renderStoryMap();
+        show("storyMapScreen");
+      }
+    });
+  } else if (Story.pendingReward) showStoryReward();
+  else {
+    renderStoryMap();
+    show("storyMapScreen");
+  }
 }
 
 function showStoryReward() {
@@ -601,6 +697,20 @@ function wireStoryUI() {
   });
   document.getElementById("storyHeroBack")?.addEventListener("click", () => show("profileScreen"));
   document.getElementById("storyMapBack")?.addEventListener("click", () => show("profileScreen"));
+  document.getElementById("storyDuelStartBtn")?.addEventListener("click", () => {
+    if (typeof SFX !== "undefined") SFX.select();
+    document.getElementById("storyDuelIntroOverlay")?.classList.remove("show");
+    const cb = Story._duelIntroCb;
+    Story._duelIntroCb = null;
+    if (cb) cb();
+  });
+  document.getElementById("storyDuelIntroBack")?.addEventListener("click", () => {
+    if (typeof SFX !== "undefined") SFX.select();
+    document.getElementById("storyDuelIntroOverlay")?.classList.remove("show");
+    Story._duelIntroCb = null;
+    renderStoryMap();
+    show("storyMapScreen");
+  });
   document.getElementById("storyMapRestart")?.addEventListener("click", () => {
     if (confirm("¿Empezar la historia desde el principio? Se pierde el camino actual.")) {
       resetStoryProgress();

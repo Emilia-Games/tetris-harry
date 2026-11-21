@@ -1887,6 +1887,16 @@ body[data-layout="phone-l"] #modeScreen h1.mode-title { display: none; }
 .story-panel-art svg { width: 100%; height: auto; border-radius: var(--radius-md); display: block; }
 .story-panel-text p { font-size: clamp(1rem, 3.8vw, 1.15rem); line-height: 1.45; margin: 6px 0; }
 .story-panel-step { text-align: center; font-size: 0.8rem; opacity: 0.7; }
+.story-duel-intro-card { max-width: 420px; text-align: center; }
+.story-duel-intro-tag {
+  font-family: var(--font-display); color: var(--gold); font-size: 1.1rem; margin: 0 0 8px;
+}
+.story-duel-intro-sub { font-size: 0.95rem; margin: 8px 0 14px; opacity: 0.92; }
+.story-duel-intro-av { align-items: center; gap: 10px; }
+.story-duel-intro-av > div { width: 96px; height: 96px; }
+.story-duel-intro-av svg { width: 100%; height: 100%; }
+.story-duel-vs { font-family: var(--font-display); color: var(--gold); font-size: 1.1rem; }
+.story-duel-intro .btn + .btn { margin-top: 10px; }
 .story-reward .story-reward-card { max-width: 380px; text-align: center; }
 .story-reward-icon { font-size: 3rem; margin: 8px 0; }
 .story-reward-tag { font-family: var(--font-display); color: var(--gold); font-size: 1.35rem; }
