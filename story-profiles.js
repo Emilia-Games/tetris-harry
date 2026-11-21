@@ -2,7 +2,8 @@
 
 const PROFILES_KEY = "thp_profiles_v2";
 
-const ProfileStore = {
+/** Estado interno — no usar el nombre ProfileStore (choca con window.ProfileStore). */
+const profileState = {
   data: { profiles: {}, activeId: null },
 };
 
@@ -25,28 +26,28 @@ function defaultStoryProgress() {
 function loadProfiles() {
   try {
     const raw = localStorage.getItem(PROFILES_KEY);
-    ProfileStore.data = raw
+    profileState.data = raw
       ? JSON.parse(raw)
       : { profiles: {}, activeId: null };
-    if (!ProfileStore.data.profiles) ProfileStore.data.profiles = {};
+    if (!profileState.data.profiles) profileState.data.profiles = {};
   } catch {
-    ProfileStore.data = { profiles: {}, activeId: null };
+    profileState.data = { profiles: {}, activeId: null };
   }
-  return ProfileStore.data;
+  return profileState.data;
 }
 
 function saveProfiles() {
-  localStorage.setItem(PROFILES_KEY, JSON.stringify(ProfileStore.data));
+  localStorage.setItem(PROFILES_KEY, JSON.stringify(profileState.data));
 }
 
 function activeProfile() {
-  const id = ProfileStore.data.activeId;
+  const id = profileState.data.activeId;
   if (!id) return null;
-  return ProfileStore.data.profiles[id] || null;
+  return profileState.data.profiles[id] || null;
 }
 
 function setActiveProfile(id) {
-  ProfileStore.data.activeId = id || null;
+  profileState.data.activeId = id || null;
   saveProfiles();
 }
 
@@ -57,30 +58,30 @@ function createProfile(name) {
     .slice(0, 16);
   if (!trimmed) return null;
   const id = uuid();
-  ProfileStore.data.profiles[id] = {
+  profileState.data.profiles[id] = {
     id,
     name: trimmed,
     created: Date.now(),
     story: defaultStoryProgress(),
   };
-  ProfileStore.data.activeId = id;
+  profileState.data.activeId = id;
   saveProfiles();
-  return ProfileStore.data.profiles[id];
+  return profileState.data.profiles[id];
 }
 
 function deleteProfile(id) {
-  if (!ProfileStore.data.profiles[id]) return false;
-  delete ProfileStore.data.profiles[id];
-  if (ProfileStore.data.activeId === id) {
-    const rest = Object.keys(ProfileStore.data.profiles);
-    ProfileStore.data.activeId = rest[0] || null;
+  if (!profileState.data.profiles[id]) return false;
+  delete profileState.data.profiles[id];
+  if (profileState.data.activeId === id) {
+    const rest = Object.keys(profileState.data.profiles);
+    profileState.data.activeId = rest[0] || null;
   }
   saveProfiles();
   return true;
 }
 
 function listProfiles() {
-  return Object.values(ProfileStore.data.profiles).sort(
+  return Object.values(profileState.data.profiles).sort(
     (a, b) => b.created - a.created
   );
 }
@@ -126,7 +127,9 @@ function renderProfileScreen() {
 }
 
 function wireProfileUI() {
-  document.getElementById("profileCreateBtn")?.addEventListener("click", () => {
+  if (wireProfileUI._done) return;
+  wireProfileUI._done = true;
+  const onCreate = () => {
     const input = document.getElementById("profileNameInput");
     const p = createProfile(input?.value);
     if (!p) {
@@ -135,6 +138,13 @@ function wireProfileUI() {
     }
     if (typeof SFX !== "undefined") SFX.select();
     window.StoryMode?.onProfilePicked?.(p);
+  };
+  document.getElementById("profileCreateBtn")?.addEventListener("click", onCreate);
+  document.getElementById("profileNameInput")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      onCreate();
+    }
   });
   document.getElementById("profileBack")?.addEventListener("click", () => {
     if (typeof show === "function") show("modeScreen");
@@ -144,7 +154,7 @@ function wireProfileUI() {
     const del = e.target.closest("[data-del]");
     if (del) {
       const id = del.getAttribute("data-del");
-      const p = ProfileStore.data.profiles[id];
+      const p = profileState.data.profiles[id];
       if (
         p &&
         confirm(`¿Borrar a ${p.name} y toda su historia guardada?`)

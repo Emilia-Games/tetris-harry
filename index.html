@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png" sizes="180x180">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Tetris Mágico de Hogwarts</title>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=__THP_BUILD__">
 </head>
 <body>
 <div id="sky">
@@ -289,10 +289,10 @@
   <div class="endBtns"><button class="btn green" data-again>🔁 Otra vez</button><button class="btn purple" data-menu>🏠 Elegir personajes</button></div>
 </div></div>
 
-<script src="story-profiles.js"></script>
-<script src="stories.js"></script>
-<script src="story-scenes.js"></script>
-<script src="story-mode.js"></script>
+<script src="story-profiles.js?v=__THP_BUILD__"></script>
+<script src="stories.js?v=__THP_BUILD__"></script>
+<script src="story-scenes.js?v=__THP_BUILD__"></script>
+<script src="story-mode.js?v=__THP_BUILD__"></script>
 <script>
 "use strict";
 /* ================= DISEÑO RESPONSIVE ================= */
@@ -1052,8 +1052,8 @@ function loop(now){const dt=Math.min(100,now-last);last=now;
 requestAnimationFrame(loop);
 window.HEROES=HEROES;window.VILLAINS=VILLAINS;window.AV=AV;window.startGame=startGame;
 document.getElementById('selToMode')?.addEventListener('click',()=>{Game.storyMode=false;show('modeScreen');SFX.select();});
-if(typeof ProfileStore?.wireProfileUI==='function')ProfileStore.wireProfileUI();
-if(typeof StoryMode?.wireStoryUI==='function')StoryMode.wireStoryUI();
+if(typeof window.ProfileStore?.wireProfileUI==='function')window.ProfileStore.wireProfileUI();
+if(typeof window.StoryMode?.wireStoryUI==='function')window.StoryMode.wireStoryUI();
 window.pickNormalMode=()=>{Game.storyMode=false;show('selScreen');SFX.select();};
 window.pickStoryMode=()=>{SFX.select();StoryMode?.openStoryEntry?.();};
 document.getElementById('btnModeNormal')?.addEventListener('click',()=>window.pickNormalMode());
