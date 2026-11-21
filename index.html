@@ -79,8 +79,7 @@
         <h3>🎨 Colores de las piezas</h3>
         <div class="themeChips themes" id="themes"></div>
       </div>
-      <p id="selDesc"></p><p class="vs" id="vsText">¿Quién contra quién?</p>
-      <button type="button" class="btn big glow play-magic" id="playBtn" disabled>🪄 ¡A jugar!</button>
+      <p id="selDesc"></p>
       <div class="box help parchment">
         <b>Cómo jugar:</b> completa filas para lanzar hechizos a tu rival: <b>1 fila</b> ✨ básico · <b>2</b> ⚡ fuerte · <b>3</b> 🌟 poderoso · <b>4</b> 💥 ¡SÚPER TETRIS! ¡Bájale toda su magia para ganar!<br>
         <span class="ghelp kbd-only"><kbd>⬅️</kbd><kbd>➡️</kbd> mover · <kbd>⬆️</kbd> girar · <kbd>⬇️</kbd> bajar<br>
@@ -92,6 +91,10 @@
       <h2>🐍 Elige tu oponente</h2><div class="lvTip">Nivel 1 = muy fácil · Nivel 5 = ¡muy difícil!</div>
       <div class="cards" id="villainCards"></div>
     </div>
+    <div class="sel-foot glass">
+      <p class="vs" id="vsText">¿Quién contra quién?</p>
+      <button type="button" class="btn big glow play-magic" id="playBtn" disabled>▶️ Jugar</button>
+    </div>
   </div>
   <div style="height:10px"></div>
 </section>
@@ -99,7 +102,7 @@
 <!-- JUEGO -->
 <section id="gameScreen" class="screen">
   <div id="topBar">
-    <button class="btn small purple" id="backBtn">🏠 Personajes</button>
+    <button class="btn small purple" id="backBtn" type="button"><span class="back-ico" aria-hidden="true">🏠</span><span class="back-lbl">Personajes</span></button>
     <div class="ttl">✨ Duelo de Tetris Mágico ✨</div>
     <button class="btn small green" id="pauseBtn">⏸️ Pausa</button>
     <button type="button" class="btn small mobile-menu-btn" id="gameMenuBtn" aria-label="Menú" hidden>⚙️</button>
@@ -238,7 +241,7 @@ function updateSpellBtn(){
   btn.disabled=!n;});
 }
 function updateMobileHud(){const el=document.getElementById('mobileHudScore');
- if(el?.hidden||!Game.P)return;el.textContent=`⭐ ${Game.P.score} · 📏 ${Game.P.lines}`;}
+ if(el?.hidden||!Game.P)return;el.textContent=`💛 ${Game.P.hp} · ⭐ ${Game.P.score}`;}
 function syncSelTabs(){const narrow=innerWidth<720,tab=document.querySelector('#selTabs button.active')?.dataset.tab||'hero';
  document.querySelectorAll('.sel-tab-panel').forEach(p=>{p.hidden=narrow&&p.dataset.panel!==tab;});}
 document.getElementById('selTabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;
@@ -580,7 +583,8 @@ const sel={hero:null,villain:null,theme:'arcoiris'};
 function makeCards(list,boxId,key){const box=document.getElementById(boxId);
  for(let lv=1;lv<=5;lv++){const row=document.createElement('div');row.className='lvRow lv'+lv;row.innerHTML=`<div class="lvLbl">Nivel<b>${lv}</b></div><div class="lvCards"></div>`;box.appendChild(row);}
  list.slice().sort((a,b)=>a.lv-b.lv).forEach(ch=>{const b=document.createElement('button');b.className='card';b.dataset.id=ch.id;b.dataset.lv=ch.lv;b.title=ch.n+' — '+ch.d+' (Nivel '+ch.lv+')';
-  b.innerHTML=`<span class="lvBadge">Nv ${ch.lv}</span>`+AV[ch.id]()+`<div class="nm">${ch.n}</div><div class="stars">${STARS(ch.lv)}</div><div class="ds">${ch.d}</div>`;
+  const nmShort=ch.n.includes(' ')?ch.n.split(' ')[0]:ch.n;
+  b.innerHTML=`<span class="lvBadge">Nv ${ch.lv}</span>`+AV[ch.id]()+`<div class="nm" title="${ch.n}">${nmShort}</div><div class="stars">${STARS(ch.lv)}</div><div class="ds">${ch.d}</div>`;
   b.onclick=()=>{sel[key]=ch.id;box.querySelectorAll('.card').forEach(c=>c.classList.toggle('sel',c===b));SFX.select();
    const [x,y]=centerOf(b);burst(x,y,24,key==='hero'?['#ffd86b','#fff','#ff9f43']:['#7dffb0','#c9b6ff','#fff']);updateSel();
    document.getElementById('selDesc').textContent=(key==='hero'?'🦁 ':'🐍 ')+ch.n+': '+ch.d+' · Nivel '+ch.lv;};
@@ -685,11 +689,11 @@ function fitBoards(){const mode=document.body.dataset.layout||layoutMode();const
  if(mode==='phone-p'){
   const short=vh<720;
   const inGame=document.getElementById('gameScreen')?.classList.contains('show');
-  cellMin=short?12:14;cellMax=38;
+  cellMin=short?14:15;cellMax=40;
   if(inGame&&Game.P?.cv){
-   const hudEl=document.querySelector('.sideWrap.player .player-panel');
+   const rivalBar=document.querySelector('.sideWrap.rival');
    const stage=document.querySelector('.boardStage');
-   const hudBottom=hudEl?.getBoundingClientRect().bottom??tb+80;
+   const hudBottom=rivalBar?.getBoundingClientRect().bottom??tb+48;
    const dockTop2=dockOn?dock.getBoundingClientRect().top:vh;
    const altoLibre=Math.max(0,dockTop2-hudBottom-FRAME_PAD);
    const stageW=stage?.getBoundingClientRect().width||(vw-24);
