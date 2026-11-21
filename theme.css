@@ -1235,12 +1235,35 @@ body[data-layout="phone-l"] .sideWrap.rival .rival-mini {
 }
 
 /* Landscape táctil ancho (iPad…): columnas laterales, sin dock inferior */
-body[data-layout="touch-l"] #gameScreen.show,
-body[data-layout="phone-l"] #gameScreen.show {
+body[data-layout="touch-l"] #gameScreen.show {
   grid-template-rows: auto 1fr;
   grid-template-areas: "topbar" "arena";
   height: 100%;
   max-height: 100%;
+}
+body[data-layout="phone-l"] #gameScreen.show {
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas: "topbar" "mhud" "arena";
+  height: 100%;
+  max-height: 100%;
+}
+body[data-layout="phone-l"] #topBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 4px calc(8px + var(--safe-r)) 2px calc(8px + var(--safe-l));
+  grid-area: topbar;
+  gap: 8px;
+}
+body[data-layout="phone-l"] #gameMenuBtn {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  padding: 0;
+  border-radius: 50%;
+  margin-left: auto;
 }
 body[data-layout="touch-l"] #gameScreen #touchDock,
 body[data-layout="touch-l"] #touch,
@@ -1671,9 +1694,7 @@ body[data-layout="phone-l"] .mobile-hud-score:not([hidden]) {
   display: flex;
   justify-content: center;
   align-items: center;
-  grid-area: topbar;
   padding: 0 12px 4px;
-  margin-top: -4px;
   font-size: clamp(0.72rem, 3.2vw, 0.85rem);
   font-weight: 700;
   color: var(--gold);
@@ -1684,7 +1705,11 @@ body[data-layout="phone-p"] #gameScreen.show {
   grid-template-rows: auto auto 1fr auto;
   grid-template-areas: "topbar" "mhud" "arena" "dock";
 }
-body[data-layout="phone-p"] .mobile-hud-score:not([hidden]) { grid-area: mhud; }
+body[data-layout="phone-p"] .mobile-hud-score:not([hidden]),
+body[data-layout="phone-l"] .mobile-hud-score:not([hidden]) {
+  grid-area: mhud;
+  margin-top: 0;
+}
 .mobile-game-menu {
   position: fixed;
   top: calc(52px + var(--safe-t));

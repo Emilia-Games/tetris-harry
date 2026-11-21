@@ -580,10 +580,21 @@ function centerOf(el){const r=el.getBoundingClientRect();return [r.left+r.width/
 
 /* ================= PANTALLA DE SELECCIÓN ================= */
 const sel={hero:null,villain:null,theme:'arcoiris'};
+function shortCharName(ch){
+ if(ch.id==='molly')return 'Molly';
+ if(ch.id==='arthur')return 'Arthur';
+ if(ch.id==='mcgonagall'||ch.id==='quirrell')return ch.n.replace(/^Prof\.\s*/,'');
+ if(ch.id==='voldemort')return 'Voldemort';
+ if(ch.id==='snape')return 'Snape';
+ const rest=ch.n.replace(/^(Prof\.|Sr\.|Sra\.|Lord)\s+/,'').trim();
+ const p=rest.split(/\s+/).filter(Boolean);
+ if(p.length<=1)return p[0]||ch.n;
+ return p[0];
+}
 function makeCards(list,boxId,key){const box=document.getElementById(boxId);
  for(let lv=1;lv<=5;lv++){const row=document.createElement('div');row.className='lvRow lv'+lv;row.innerHTML=`<div class="lvLbl">Nivel<b>${lv}</b></div><div class="lvCards"></div>`;box.appendChild(row);}
  list.slice().sort((a,b)=>a.lv-b.lv).forEach(ch=>{const b=document.createElement('button');b.className='card';b.dataset.id=ch.id;b.dataset.lv=ch.lv;b.title=ch.n+' — '+ch.d+' (Nivel '+ch.lv+')';
-  const nmShort=ch.n.includes(' ')?ch.n.split(' ')[0]:ch.n;
+  const nmShort=shortCharName(ch);
   b.innerHTML=`<span class="lvBadge">Nv ${ch.lv}</span>`+AV[ch.id]()+`<div class="nm" title="${ch.n}">${nmShort}</div><div class="stars">${STARS(ch.lv)}</div><div class="ds">${ch.d}</div>`;
   b.onclick=()=>{sel[key]=ch.id;box.querySelectorAll('.card').forEach(c=>c.classList.toggle('sel',c===b));SFX.select();
    const [x,y]=centerOf(b);burst(x,y,24,key==='hero'?['#ffd86b','#fff','#ff9f43']:['#7dffb0','#c9b6ff','#fff']);updateSel();
