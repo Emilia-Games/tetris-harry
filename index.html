@@ -102,12 +102,20 @@
     <button class="btn small purple" id="backBtn">🏠 Personajes</button>
     <div class="ttl">✨ Duelo de Tetris Mágico ✨</div>
     <button class="btn small green" id="pauseBtn">⏸️ Pausa</button>
+    <button type="button" class="btn small mobile-menu-btn" id="gameMenuBtn" aria-label="Menú" hidden>⚙️</button>
+  </div>
+  <p class="mobile-hud-score" id="mobileHudScore" hidden aria-live="polite"></p>
+  <div id="mobileGameMenu" class="mobile-game-menu" hidden>
+    <button type="button" class="btn small green" id="mobilePauseBtn">⏸️ Pausar</button>
+    <button type="button" class="btn small" id="mobileMuteBtn">🔊 Sonido</button>
+    <button type="button" class="btn small" id="mobileMusicBtn">🎵 Música</button>
   </div>
   <div class="duelRoot" id="gameWrap">
     <nav class="touch-edge left" id="touchL" aria-label="Controles izquierda">
       <button type="button" class="tbtn" data-a="left" aria-label="Izquierda">⬅️</button>
       <button type="button" class="tbtn" data-a="rot" aria-label="Girar">🔄</button>
       <button type="button" class="tbtn hold" data-a="hold" aria-label="Guardar">🎒</button>
+      <button type="button" class="tbtn spell" data-a="spell" id="spellBtnEdge" aria-label="Hechizo">✨</button>
     </nav>
     <div class="sideWrap player">
       <div class="phud glass" id="phud" hidden></div>
@@ -168,7 +176,7 @@
       <button type="button" class="tbtn" data-a="right" aria-label="Derecha">➡️</button>
       <button type="button" class="tbtn" data-a="down" aria-label="Bajar">⬇️</button>
       <button type="button" class="tbtn drop" data-a="drop" aria-label="Caída rápida">⏬</button>
-      <button type="button" class="tbtn" data-a="pause" aria-label="Pausa">⏸️</button>
+      <button type="button" class="tbtn spell" data-a="spell" id="spellBtnEdgeR" aria-label="Hechizo">✨</button>
     </nav>
   </div>
   <footer id="touchDock">
@@ -178,8 +186,9 @@
       <button type="button" class="tbtn" data-a="right" aria-label="Mover derecha">➡️</button>
       <button type="button" class="tbtn" data-a="down" aria-label="Bajar pieza">⬇️</button>
       <button type="button" class="tbtn drop" data-a="drop" aria-label="Caída rápida">⏬</button>
-      <button type="button" class="tbtn hold" data-a="hold" aria-label="Guardar pieza">🎒</button>
-      <button type="button" class="tbtn" data-a="pause" aria-label="Pausa">⏸️</button>
+      <button type="button" class="tbtn spell" data-a="spell" id="spellBtn" aria-label="Hechizo">✨</button>
+      <button type="button" class="tbtn hold phone-extra" data-a="hold" aria-label="Guardar pieza">🎒</button>
+      <button type="button" class="tbtn phone-extra" data-a="pause" aria-label="Pausa">⏸️</button>
     </div>
   </footer>
 </section>
@@ -208,8 +217,28 @@ function layoutMode(){const w=innerWidth,h=innerHeight,touch=isCoarseTouch();
  if(w<720||w<920&&h>w)return 'phone-p';
  if(w>=720)return 'tablet';
  return 'phone-p';}
+function mobileDuel(){const m=layoutMode();return m==='phone-p'||m==='phone-l';}
+function syncMobileChrome(){
+ const m=layoutMode();const onPhone=m==='phone-p'||m==='phone-l';
+ const ing=document.getElementById('gameScreen')?.classList.contains('show');
+ document.getElementById('gameMenuBtn')?.toggleAttribute('hidden',!onPhone||!ing);
+ document.getElementById('mobileHudScore')?.toggleAttribute('hidden',!onPhone||!ing);
+ if(!ing)document.getElementById('mobileGameMenu')?.setAttribute('hidden','');
+ const pb=document.getElementById('playBtn');
+ if(pb&&onPhone)pb.textContent='▶️ Jugar';
+}
 function setLayout(){const touch=isCoarseTouch();
- document.body.classList.toggle('touch-ui',touch);document.body.dataset.layout=layoutMode();syncSelTabs();if(window.G?.P)fitBoards();}
+ document.body.classList.toggle('touch-ui',touch);document.body.dataset.layout=layoutMode();syncSelTabs();syncMobileChrome();if(window.G?.P)fitBoards();}
+const SPELL_ICON=['','✨','⚡','🌟','💥'];
+function updateSpellBtn(){
+ const n=Game.spellBank||0;
+ document.querySelectorAll('.tbtn.spell').forEach(btn=>{
+  btn.textContent=SPELL_ICON[n]||'✨';
+  btn.classList.toggle('ready',n>0);
+  btn.disabled=!n;});
+}
+function updateMobileHud(){const el=document.getElementById('mobileHudScore');
+ if(el?.hidden||!Game.P)return;el.textContent=`⭐ ${Game.P.score} · 📏 ${Game.P.lines}`;}
 function syncSelTabs(){const narrow=innerWidth<720,tab=document.querySelector('#selTabs button.active')?.dataset.tab||'hero';
  document.querySelectorAll('.sel-tab-panel').forEach(p=>{p.hidden=narrow&&p.dataset.panel!==tab;});}
 document.getElementById('selTabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;
@@ -565,7 +594,12 @@ THEMES.forEach(t=>{const b=document.createElement('button');b.className='theme c
  themesBox.appendChild(b);});
 const playBtn=document.getElementById('playBtn'),vsText=document.getElementById('vsText');
 function updateSel(){const h=HEROES.find(x=>x.id===sel.hero),v=VILLAINS.find(x=>x.id===sel.villain);
- playBtn.disabled=!(h&&v);vsText.textContent=h&&v?`${h.n.split(' ').pop()} (N${h.lv}) ⚡ vs ⚡ ${v.n.split(' ').pop()} (N${v.lv})`:(h?'Ahora elige a tu oponente 👉':v?'👈 Ahora elige tu personaje':'¿Quién contra quién?');}
+ const phone=layoutMode()==='phone-p'||layoutMode()==='phone-l'||innerWidth<720;
+ playBtn.disabled=!(h&&v);
+ if(h&&v)vsText.textContent=phone?'⚡ VS ⚡':`${h.n.split(' ').pop()} (N${h.lv}) ⚡ vs ⚡ ${v.n.split(' ').pop()} (N${v.lv})`;
+ else vsText.textContent=phone?'':(h?'👉 Rival':v?'👈 Tú':'');
+ if(phone){document.getElementById('selDesc').textContent=h&&v?'':'';}
+ else if(h||v){const ch=h||v;document.getElementById('selDesc').textContent=(h?'🦁 ':'🐍 ')+ch.n+': '+ch.d+' · Nivel '+ch.lv;}}
 playBtn.onclick=()=>{ac();startGame();};
 
 /* ================= TETRIS: DOS TABLEROS ================= */
@@ -741,7 +775,8 @@ function startGame(){
  document.getElementById('pAv').innerHTML=AV[h.id]();document.getElementById('vAv').innerHTML=AV[v.id]();
  document.getElementById('pName').textContent=h.n;document.getElementById('vName').textContent=v.n;
  show('gameScreen');hideOv();
- Game.P=mkBoard('p');Game.V=mkBoard('v');Object.assign(Game,{running:true,paused:false,over:false});
+ Game.P=mkBoard('p');Game.V=mkBoard('v');Object.assign(Game,{running:true,paused:false,over:false,spellBank:0});
+ updateSpellBtn();syncMobileChrome();
  const P=Game.P,V=Game.V;P.hpMax=P.hp=HERO_CFG.hp[h.lv];P.dmgMult=HERO_CFG.dmg[h.lv];P.gravBase=HERO_CFG.grav[h.lv];
  V.dmgMult=VILL_CFG.dmg[v.lv];V.gravBase=VILL_CFG.grav[v.lv];V.cfg={wait:VILL_CFG.wait[v.lv],move:VILL_CFG.move[v.lv],drop:VILL_CFG.drop[v.lv],mis:VILL_CFG.mis[v.lv],range:VILL_CFG.range[v.lv]};
  if(window.TEST_AUTOPLAY){P.autoplay=true;P.cfg=window.TEST_AUTOPLAY;}
@@ -787,9 +822,10 @@ function clearLines(B,full){const n=full.length;B.flash=full.slice();B.flashT=25
  const frame=B.cv.closest('.boardFrame');if(frame){frame.classList.remove('hit');void frame.offsetWidth;frame.classList.add('hit');setTimeout(()=>frame.classList.remove('hit'),400);}
  if(isP(B)){const gs=document.getElementById('gameScreen');gs.classList.remove('screenShake');void gs.offsetWidth;gs.classList.add('screenShake');setTimeout(()=>gs.classList.remove('screenShake'),420);}
  full.forEach(y=>{const yy=r.top+(y+.5)*(r.height/ROWS);for(let k=0;k<6;k++)burst(r.left+r.width*k/5,yy,2+n*2,isP(B)?theme().concat(['#fff']):VCOL,{speed:2+n,size:3+n*1.5});});
- cast(B,n);
+ if(isP(B)&&mobileDuel()){Game.spellBank=Math.min(4,Math.max(1,n));updateSpellBtn();SFX['t'+Math.min(n,4)]();}
+ else cast(B,n);
  if(B.level>oldLvl)setTimeout(()=>{if(!Game.over){showSpell(B,'🏆 ¡Nivel '+B.level+'!',!isP(B));if(isP(B))SFX.level();}},1600);
- updateHUD(B);}
+ updateHUD(B);updateMobileHud();}
 function cast(B,n){const T=TIERS[n],S=T.pool[Math.random()*T.pool.length|0],evil=!isP(B);
  const c=evil?VCOL[Math.random()*VCOL.length|0]:S.c;const col=evil?VCOL.concat([c,'#e6d6ff']):T.col.concat([S.c,S.c]);
  SFX['t'+n]();if(evil)SFX.curse();Game.lastSpell=S.sp;
@@ -812,6 +848,7 @@ function popDmg(x,y,t,c){const d=document.createElement('div');d.className='dmgP
 function showSpell(B,t,bad,lbl,cls,c){const e=$s(B,'Spell');e.innerHTML=(lbl?`<small>${lbl}</small>`:'')+t;e.className='spellText '+(bad?'bad ':'')+(cls||'');
  e.style.textShadow=c?`0 0 12px ${c},0 0 30px ${c},0 0 50px ${c},0 3px 0 #2b1650`:'';void e.offsetWidth;e.classList.add('go');}
 function updateHUD(B){$s(B,'Score').textContent=B.score;$s(B,'Level').textContent=B.level;$s(B,'Lines').textContent=B.lines;
+ if(isP(B))updateMobileHud();
  const fill=$s(B,'HpFill');const pct=(B.hp/B.hpMax*100)+'%';if(fill.style.width!==pct){fill.classList.remove('hp-pulse');void fill.offsetWidth;fill.classList.add('hp-pulse');}
  fill.style.width=pct;$s(B,'HpTxt').textContent=B.hp+' / '+B.hpMax;}
 function drawMini(cv,t,B){if(!cv)return;const c=cv.getContext('2d');c.clearRect(0,0,cv.width,cv.height);if(!t)return;const m=SHAPES[t];const s=18;
@@ -872,13 +909,20 @@ function togglePause(){if(!Game.running||Game.over)return;Game.paused=!Game.paus
 function toMenu(){Game.running=false;Game.over=true;hideOv();show('selScreen');}
 document.getElementById('backBtn').onclick=toMenu;
 document.getElementById('pauseBtn').onclick=togglePause;document.getElementById('resumeBtn').onclick=togglePause;
+document.getElementById('mobilePauseBtn')?.addEventListener('click',()=>{togglePause();document.getElementById('mobileGameMenu')?.setAttribute('hidden','');});
+document.getElementById('gameMenuBtn')?.addEventListener('click',()=>{const m=document.getElementById('mobileGameMenu');if(!m)return;const open=m.hasAttribute('hidden');if(open)m.removeAttribute('hidden');else m.setAttribute('hidden','');SFX.select();});
+document.getElementById('mobileMuteBtn')?.addEventListener('click',()=>{muteBtn.click();});
+document.getElementById('mobileMusicBtn')?.addEventListener('click',()=>{musicBtn.click();});
+addEventListener('click',e=>{if(e.target.closest('#mobileGameMenu,#gameMenuBtn'))return;document.getElementById('mobileGameMenu')?.setAttribute('hidden','');});
+syncMobileChrome();
 document.querySelectorAll('[data-again]').forEach(b=>b.onclick=()=>startGame());
 document.querySelectorAll('[data-menu]').forEach(b=>b.onclick=toMenu);
 addEventListener('keydown',e=>{if(!document.getElementById('gameScreen').classList.contains('show'))return;const P=Game.P;
  const map={ArrowLeft:()=>move(P,-1),ArrowRight:()=>move(P,1),ArrowUp:()=>rotate(P,1),ArrowDown:()=>softDrop(P),' ':()=>{if(!e.repeat)hardDrop(P)},
   z:()=>rotate(P,-1),Z:()=>rotate(P,-1),x:()=>rotate(P,1),X:()=>rotate(P,1),c:()=>doHold(P),C:()=>doHold(P),Shift:()=>doHold(P),p:togglePause,P:togglePause,Escape:togglePause};
  if(map[e.key]){e.preventDefault();ac();map[e.key]();}});
-const ACT={left:()=>move(Game.P,-1),right:()=>move(Game.P,1),down:()=>softDrop(Game.P),rot:()=>rotate(Game.P,1),drop:()=>hardDrop(Game.P),hold:()=>doHold(Game.P),pause:togglePause};
+function castSpell(){if(!Game.spellBank||Game.over||!Game.running)return;const n=Game.spellBank;Game.spellBank=0;updateSpellBtn();cast(Game.P,n);}
+const ACT={left:()=>move(Game.P,-1),right:()=>move(Game.P,1),down:()=>softDrop(Game.P),rot:()=>rotate(Game.P,1),drop:()=>hardDrop(Game.P),hold:()=>doHold(Game.P),pause:togglePause,spell:castSpell};
  document.querySelectorAll('#touch .tbtn, .touch-edge .tbtn, #touchPad .tbtn').forEach(b=>{if(!b.dataset.a)return;let t1,t2;const a=b.dataset.a,rep=['left','right','down'].includes(a);
  const stop=()=>{clearTimeout(t1);clearInterval(t2);};
  b.addEventListener('pointerdown',e=>{e.preventDefault();ac();ACT[a]();if(rep){t1=setTimeout(()=>{t2=setInterval(ACT[a],70)},220);}});
