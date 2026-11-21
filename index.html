@@ -601,7 +601,7 @@ function updateSel(){const h=HEROES.find(x=>x.id===sel.hero),v=VILLAINS.find(x=>
  const phone=layoutMode()==='phone-p'||layoutMode()==='phone-l'||innerWidth<720;
  playBtn.disabled=!(h&&v);
  if(h&&v)vsText.textContent=phone?'⚡ VS ⚡':`${h.n.split(' ').pop()} (N${h.lv}) ⚡ vs ⚡ ${v.n.split(' ').pop()} (N${v.lv})`;
- else vsText.textContent=phone?'':(h?'👉 Rival':v?'👈 Tú':'');
+ else vsText.textContent=phone?'':(h?'👉 Elige rival':v?'👈 Elige héroe':'¿Quién contra quién?');
  if(phone){document.getElementById('selDesc').textContent=h&&v?'':'';}
  else if(h||v){const ch=h||v;document.getElementById('selDesc').textContent=(h?'🦁 ':'🐍 ')+ch.n+': '+ch.d+' · Nivel '+ch.lv;}}
 playBtn.onclick=()=>{ac();startGame();};
