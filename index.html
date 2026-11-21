@@ -118,7 +118,7 @@
 </section>
 
 <div class="overlay story-duel-intro" id="storyDuelIntroOverlay">
-  <div class="endCard story-duel-intro-card glass-gold">
+  <div class="endCard story-duel-intro-card">
     <p class="story-duel-intro-tag">⚔️ Duelo de Tetris</p>
     <h2 id="storyDuelIntroTitle">¡Duelo contra el rival!</h2>
     <p class="story-duel-intro-sub" id="storyDuelIntroSub"></p>
@@ -203,6 +203,28 @@
     <button type="button" class="btn small mobile-menu-btn" id="gameMenuBtn" aria-label="Menú" hidden>⚙️</button>
   </div>
   <p class="mobile-hud-score" id="mobileHudScore" hidden aria-live="polite"></p>
+  <div class="mobile-vs-bar" id="mobileVsBar" hidden>
+    <div class="mvs-side mvs-hero">
+      <div class="mvs-av" id="mvsHeroAv" aria-hidden="true"></div>
+      <div class="mvs-info">
+        <div class="mvs-name" id="mvsHeroName"></div>
+        <div class="hpWrap mvs-hp">
+          <div class="hpBar"><div class="hpFill good" id="mvsPHpFill"></div><div class="hpTxt" id="mvsPHpTxt"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="mvs-vs" aria-hidden="true">⚡<br>VS<br>⚡</div>
+    <div class="mvs-side mvs-vill">
+      <div class="mvs-vmini" id="mvsVillainMiniSlot"></div>
+      <div class="mvs-info">
+        <div class="mvs-name" id="mvsVillainName"></div>
+        <div class="hpWrap mvs-hp">
+          <div class="hpBar"><div class="hpFill" id="mvsVHpFill"></div><div class="hpTxt" id="mvsVHpTxt"></div></div>
+        </div>
+      </div>
+      <div class="mvs-av" id="mvsVillainAv" aria-hidden="true"></div>
+    </div>
+  </div>
   <div id="mobileGameMenu" class="mobile-game-menu" hidden>
     <button type="button" class="btn small green" id="mobilePauseBtn">⏸️ Pausar</button>
     <button type="button" class="btn small" id="mobileMuteBtn">🔊 Sonido</button>
@@ -320,14 +342,49 @@ function layoutMode(){const w=innerWidth,h=innerHeight,touch=isCoarseTouch();
  if(w>=720)return 'tablet';
  return 'phone-p';}
 function mobileDuel(){const m=layoutMode();return m==='phone-p'||m==='phone-l';}
+const _mvsMiniHome={parent:null,next:null};
+function syncMobileVsBar(){
+ const bar=document.getElementById('mobileVsBar');
+ const slot=document.getElementById('mvsVillainMiniSlot');
+ const mini=document.querySelector('.sideWrap.rival .rival-mini');
+ const rival=document.querySelector('.sideWrap.rival');
+ const ing=document.getElementById('gameScreen')?.classList.contains('show');
+ const phoneP=layoutMode()==='phone-p'&&ing&&Game?.running&&!Game.over;
+ const hud=document.getElementById('mobileHudScore');
+ if(!phoneP){
+  bar?.setAttribute('hidden','');
+  if(mini&&_mvsMiniHome.parent){_mvsMiniHome.parent.insertBefore(mini,_mvsMiniHome.next);}
+  rival?.style.removeProperty('display');
+  return;
+ }
+ bar?.removeAttribute('hidden');
+ hud?.setAttribute('hidden','');
+ if(mini&&slot&&mini.parentElement!==slot){
+  if(!_mvsMiniHome.parent){_mvsMiniHome.parent=mini.parentElement;_mvsMiniHome.next=mini.nextSibling;}
+  slot.appendChild(mini);
+ }
+ rival?.style.setProperty('display','none','important');
+ requestAnimationFrame(()=>fitBoards?.());
+}
+function mirrorMobileVsHp(){
+ if(document.getElementById('mobileVsBar')?.hasAttribute('hidden'))return;
+ for(const[idSrc,idDst,idTxtSrc,idTxtDst]of[['pHpFill','mvsPHpFill','pHpTxt','mvsPHpTxt'],['vHpFill','mvsVHpFill','vHpTxt','mvsVHpTxt']]){
+  const s=document.getElementById(idSrc),d=document.getElementById(idDst),ts=document.getElementById(idTxtSrc),td=document.getElementById(idTxtDst);
+  if(d&&s)d.style.width=s.style.width;
+  if(td&&ts)td.textContent=ts.textContent;
+ }}
 function syncMobileChrome(){
  const m=layoutMode();const onPhone=m==='phone-p'||m==='phone-l';
  const ing=document.getElementById('gameScreen')?.classList.contains('show');
  document.getElementById('gameMenuBtn')?.toggleAttribute('hidden',!onPhone||!ing);
- document.getElementById('mobileHudScore')?.toggleAttribute('hidden',!onPhone||!ing);
+ const vsOn=m==='phone-p'&&ing&&Game?.running&&!Game.over;
+ const hud=document.getElementById('mobileHudScore');
+ if(vsOn)hud?.setAttribute('hidden','');
+ else hud?.toggleAttribute('hidden',!onPhone||!ing);
  if(!ing)document.getElementById('mobileGameMenu')?.setAttribute('hidden','');
  const pb=document.getElementById('playBtn');
  if(pb&&onPhone)pb.textContent='▶️ Jugar';
+ syncMobileVsBar();
 }
 function setLayout(){const touch=isCoarseTouch();
  document.body.classList.toggle('touch-ui',touch);document.body.dataset.layout=layoutMode();syncSelTabs();syncMobileChrome();if(window.G?.P)fitBoards();}
@@ -903,6 +960,9 @@ function startGame(){
  Game.hero=h;Game.vill=v;
  document.getElementById('pAv').innerHTML=AV[h.id]();document.getElementById('vAv').innerHTML=AV[v.id]();
  document.getElementById('pName').textContent=h.n;document.getElementById('vName').textContent=v.n;
+ const mha=document.getElementById('mvsHeroAv'),mva=document.getElementById('mvsVillainAv');
+ if(mha)mha.innerHTML=AV[h.id]();if(mva)mva.innerHTML=AV[v.id]();
+ document.getElementById('mvsHeroName').textContent=h.n;document.getElementById('mvsVillainName').textContent=v.n;
  show('gameScreen');hideOv();
  Game.P=mkBoard('p');Game.V=mkBoard('v');Object.assign(Game,{running:true,paused:false,over:false,spellBank:0});
  updateSpellBtn();syncMobileChrome();
@@ -986,7 +1046,8 @@ function showSpell(B,t,bad,lbl,cls,c){const e=$s(B,'Spell');e.innerHTML=(lbl?`<s
 function updateHUD(B){$s(B,'Score').textContent=B.score;$s(B,'Level').textContent=B.level;$s(B,'Lines').textContent=B.lines;
  if(isP(B))updateMobileHud();
  const fill=$s(B,'HpFill');const pct=(B.hp/B.hpMax*100)+'%';if(fill.style.width!==pct){fill.classList.remove('hp-pulse');void fill.offsetWidth;fill.classList.add('hp-pulse');}
- fill.style.width=pct;$s(B,'HpTxt').textContent=B.hp+' / '+B.hpMax;}
+ fill.style.width=pct;$s(B,'HpTxt').textContent=B.hp+' / '+B.hpMax;
+ mirrorMobileVsHp();}
 function drawMini(cv,t,B){if(!cv)return;const c=cv.getContext('2d');c.clearRect(0,0,cv.width,cv.height);if(!t)return;const m=SHAPES[t];const s=18;
  let minx=9,maxx=-1,miny=9,maxy=-1;m.forEach((r,y)=>r.forEach((v,x)=>{if(v){minx=Math.min(minx,x);maxx=Math.max(maxx,x);miny=Math.min(miny,y);maxy=Math.max(maxy,y);}}));
  const ox=(cv.width-(maxx-minx+1)*s)/2-minx*s,oy=(cv.height-(maxy-miny+1)*s)/2-miny*s;
