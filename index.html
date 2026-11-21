@@ -52,18 +52,14 @@
 
 <!-- PERFILES -->
 <section id="profileScreen" class="screen">
-  <h2 class="story-h2">¿Quién juega?</h2>
-  <p class="story-lead">Escribe tu nombre. Cada jugador guarda su propia historia.</p>
+  <h2 class="story-h2 profile-h2">¿Quién juega?</h2>
   <div id="profileList" class="profile-list"></div>
   <div class="profile-new glass">
-    <label class="profile-label" for="profileNameInput">Tu nombre</label>
-    <input id="profileNameInput" class="profile-input" type="text" maxlength="16" placeholder="Ej: Emilia" autocomplete="off">
-    <button type="button" class="btn big" id="profileCreateBtn">✨ Crear jugador</button>
-    <button type="button" class="btn small purple" id="profileNewLink">+ Nuevo jugador</button>
+    <input id="profileNameInput" class="profile-input" type="text" maxlength="16" placeholder="Tu nombre" autocomplete="off" aria-label="Tu nombre">
+    <button type="button" class="btn big green" id="profileCreateBtn">▶️ Empezar</button>
   </div>
-  <div class="story-foot">
+  <div class="story-foot profile-foot">
     <button type="button" class="btn purple" id="profileBack">🏠 Modos</button>
-    <button type="button" class="btn big green" id="profileContinueBtn" hidden>▶️ Continuar</button>
   </div>
 </section>
 
@@ -82,7 +78,7 @@
 
 <section id="storyHeroScreen" class="screen">
   <h2 class="story-h2">📖 Elige tu mago</h2>
-  <p class="story-lead">En la historia solo juegas con un héroe que irá subiendo de nivel.</p>
+  <p class="story-lead" id="storyHeroLead">Elige un héroe con historia lista. Otros: Próximamente.</p>
   <div class="story-hero-grid" id="storyHeroCards"></div>
   <div class="story-foot">
     <button type="button" class="btn purple" id="storyHeroBack">🏠 Modos</button>
@@ -187,6 +183,7 @@
   <div id="topBar">
     <button class="btn small purple" id="backBtn" type="button"><span class="back-ico" aria-hidden="true">🏠</span><span class="back-lbl">Personajes</span></button>
     <div class="ttl">✨ Duelo de Tetris Mágico ✨</div>
+    <p class="story-duel-caption" id="storyDuelCaption" hidden></p>
     <button class="btn small green" id="pauseBtn">⏸️ Pausa</button>
     <button type="button" class="btn small mobile-menu-btn" id="gameMenuBtn" aria-label="Menú" hidden>⚙️</button>
   </div>
@@ -294,6 +291,7 @@
 
 <script src="story-profiles.js"></script>
 <script src="stories.js"></script>
+<script src="story-scenes.js"></script>
 <script src="story-mode.js"></script>
 <script>
 "use strict";
@@ -880,10 +878,10 @@ function startGame(){
  updateSpellBtn();syncMobileChrome();
  const P=Game.P,V=Game.V;
  const hLv=Game.storyMode&&window.StoryMode?StoryMode.effectiveHeroLv():h.lv;
- const vLv=Game.storyMode&&Game.storyChapter?Math.min(5,Math.max(1,Game.storyChapter.id)):v.lv;
+ const vLv=Game.storyMode&&window.StoryMode?StoryMode.effectiveHeroLv():v.lv;
  P.hpMax=P.hp=HERO_CFG.hp[hLv];P.dmgMult=HERO_CFG.dmg[hLv];P.gravBase=HERO_CFG.grav[hLv];
  V.dmgMult=VILL_CFG.dmg[vLv];V.gravBase=VILL_CFG.grav[vLv];V.cfg={wait:VILL_CFG.wait[vLv],move:VILL_CFG.move[vLv],drop:VILL_CFG.drop[vLv],mis:VILL_CFG.mis[vLv],range:VILL_CFG.range[vLv]};
- if(Game.storyMode&&window.StoryMode)StoryMode.applyStoryPassives(Game);
+ if(Game.storyMode&&window.StoryMode){StoryMode.applyStoryPassives(Game);StoryMode.syncDuelHud?.();}
  if(window.TEST_AUTOPLAY){P.autoplay=true;P.cfg=window.TEST_AUTOPLAY;}
  document.getElementById('pTag').textContent='🧒 ¡Tú! · '+STARS(h.lv);document.getElementById('vTag').textContent='🤖 '+STARS(v.lv);
  setLayout();
@@ -1016,9 +1014,9 @@ function hideOv(){document.querySelectorAll('.overlay').forEach(o=>o.classList.r
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('show',s.id===id));}
 function togglePause(){if(!Game.running||Game.over)return;Game.paused=!Game.paused;document.getElementById('pauseOv').classList.toggle('show',Game.paused);SFX.select();}
 function toMenu(){Game.running=false;Game.over=true;hideOv();
- const story=Game.storyMode;Game.storyMode=false;
- if(story&&window.StoryMode){StoryMode.renderStoryMap();show('storyMapScreen');}
- else show('modeScreen');}
+ const story=Game.storyMode;
+ if(story&&window.StoryMode){StoryMode.syncDuelHud?.(false);StoryMode.renderStoryMap();show('storyMapScreen');return;}
+ Game.storyMode=false;StoryMode?.syncDuelHud?.(false);show('modeScreen');}
 document.getElementById('backBtn').onclick=toMenu;
 document.getElementById('pauseBtn').onclick=togglePause;document.getElementById('resumeBtn').onclick=togglePause;
 document.getElementById('mobilePauseBtn')?.addEventListener('click',()=>{togglePause();document.getElementById('mobileGameMenu')?.setAttribute('hidden','');});

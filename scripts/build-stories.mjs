@@ -2,7 +2,15 @@
 import { writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MASTER_STORIES } from "./story-master-content.js";
+import harry from "./heroes/harry.mjs";
+import hermione from "./heroes/hermione.mjs";
+import ron from "./heroes/ron.mjs";
+import neville from "./heroes/neville.mjs";
+import luna from "./heroes/luna.mjs";
+import ginny from "./heroes/ginny.mjs";
+
+const MASTER_STORIES = { harry, hermione, ron, neville, luna, ginny };
+const STORY_READY_HEROES = Object.keys(MASTER_STORIES);
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -111,8 +119,22 @@ const MAP_ORDER = [
   "n24",
 ];
 
-const heroIds = Object.keys(MASTER_STORIES);
-for (const hid of heroIds) {
+const ALL_HERO_IDS = [
+  "harry",
+  "hermione",
+  "ron",
+  "neville",
+  "luna",
+  "ginny",
+  "fred",
+  "george",
+  "sirius",
+  "mcgonagall",
+  "molly",
+  "arthur",
+  "dobby",
+];
+for (const hid of STORY_READY_HEROES) {
   const n = Object.keys(MASTER_STORIES[hid]).length;
   if (n < 24) throw new Error(`${hid} solo tiene ${n} episodios`);
 }
@@ -126,9 +148,10 @@ window.StoryData = ${JSON.stringify(
     MAP_ORDER,
     MASTER_STORIES,
     START_NODE: "n01",
-    HERO_IDS: heroIds,
+    HERO_IDS: ALL_HERO_IDS,
+    STORY_READY_HEROES,
     EPISODES_PER_HERO: Object.fromEntries(
-      heroIds.map((h) => [h, Object.keys(MASTER_STORIES[h]).length])
+      ALL_HERO_IDS.map((h) => [h, MASTER_STORIES[h] ? Object.keys(MASTER_STORIES[h]).length : 0])
     ),
   },
   null,
@@ -137,4 +160,4 @@ window.StoryData = ${JSON.stringify(
 `;
 
 writeFileSync(join(root, "stories.js"), out);
-console.log("Wrote stories.js", heroIds.length, "heroes,", MAP_ORDER.length, "graph nodes");
+console.log("Wrote stories.js", STORY_READY_HEROES.length, "ready heroes,", MAP_ORDER.length, "graph nodes");

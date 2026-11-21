@@ -1894,10 +1894,12 @@ body[data-layout="phone-l"] #modeScreen h1.mode-title { display: none; }
 #selToMode { margin-top: 6px; }
 
 #profileScreen {
-  padding: calc(10px + var(--safe-t)) 14px calc(12px + var(--safe-b));
+  padding: calc(56px + var(--safe-t)) 14px calc(12px + var(--safe-b));
   overflow-y: auto;
   gap: 12px;
 }
+.profile-h2 { margin-top: 0; text-align: center; }
+.profile-foot { margin-top: auto; }
 .profile-list { display: flex; flex-direction: column; gap: 8px; width: min(100%, 420px); margin: 0 auto; }
 .profile-row { display: flex; gap: 8px; align-items: stretch; }
 .profile-pick { flex: 1; text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; }
@@ -1919,3 +1921,22 @@ body[data-layout="phone-l"] #modeScreen h1.mode-title { display: none; }
 .story-choice-row { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 8px; }
 .story-choice-prompt { font-weight: 700; text-align: center; font-size: 1.05rem; }
 .story-choice-row .btn { width: 100%; }
+.story-hero-card.story-soon { opacity: 0.55; cursor: not-allowed; }
+.story-soon-tag {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ffd86b;
+  margin-top: 4px;
+}
+.story-duel-caption {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.78rem;
+  opacity: 0.9;
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+#topBar { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 6px; }
+#topBar .ttl { grid-column: 2; text-align: center; }
+#topBar .story-duel-caption { grid-column: 1 / -1; }

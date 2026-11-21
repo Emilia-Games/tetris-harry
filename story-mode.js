@@ -86,10 +86,37 @@ function personalize(lines) {
   )[0].lines;
 }
 
+function panelSceneMeta(nodeId) {
+  const p = loadStoryProgress();
+  const meta = nodeMeta(nodeId);
+  const c = heroContent(nodeId);
+  return {
+    heroId: p.heroId,
+    villainId: meta?.villainId,
+    bossName: c?.bossName,
+  };
+}
+
+function paintScene(art, meta) {
+  if (window.StoryScenes?.renderStoryScene) {
+    return window.StoryScenes.renderStoryScene(art, meta || {});
+  }
+  return `<svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg"><rect fill="#1a1148" width="400" height="280"/></svg>`;
+}
+
 function panelsFrom(nodeId, extra) {
   const c = heroContent(nodeId);
   if (!c) return extra || [];
-  return [{ art: c.art, lines: personalize(c.lines) }];
+  const scene = panelSceneMeta(nodeId);
+  return [
+    {
+      art: c.art,
+      lines: personalize(c.lines),
+      heroId: scene.heroId,
+      villainId: scene.villainId,
+      bossName: scene.bossName,
+    },
+  ];
 }
 
 function pathUsesNode(nodeId, branches) {
@@ -210,8 +237,18 @@ function pickChoice(nodeId, opt) {
   const content = heroContent(nodeId);
   const follow = content?.[opt.labelFrom];
   if (follow?.lines) {
-    showStoryPanels([{ art: content.art, lines: personalize(follow.lines) }], () =>
-      startNodeFlow(opt.next)
+    const scene = panelSceneMeta(nodeId);
+    showStoryPanels(
+      [
+        {
+          art: content.art,
+          lines: personalize(follow.lines),
+          heroId: scene.heroId,
+          villainId: scene.villainId,
+          bossName: scene.bossName,
+        },
+      ],
+      () => startNodeFlow(opt.next)
     );
   } else startNodeFlow(opt.next);
 }
@@ -221,19 +258,28 @@ function renderStoryHeroes() {
   const p = loadStoryProgress();
   if (!box) return;
   box.innerHTML = "";
+  const ready = data().STORY_READY_HEROES || [];
   window.HEROES?.forEach((ch) => {
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "card story-hero-card" + (p.heroId === ch.id ? " sel" : "");
-    b.innerHTML = window.AV[ch.id]() + `<div class="nm">${ch.n.split(" ")[0]}</div>`;
-    b.onclick = () => {
-      p.heroId = ch.id;
-      if (!p.nodeId) p.nodeId = data().START_NODE || "n01";
-      saveProgress();
-      box.querySelectorAll(".card").forEach((x) => x.classList.toggle("sel", x === b));
-      document.getElementById("storyMapContinue").disabled = false;
-      if (typeof SFX !== "undefined") SFX.select();
-    };
+    const ok = ready.includes(ch.id);
+    b.className =
+      "card story-hero-card" +
+      (p.heroId === ch.id ? " sel" : "") +
+      (ok ? "" : " story-soon");
+    b.disabled = !ok;
+    const soon = ok ? "" : `<span class="story-soon-tag">Próximamente</span>`;
+    b.innerHTML = window.AV[ch.id]() + `<div class="nm">${ch.n.split(" ")[0]}</div>${soon}`;
+    if (ok) {
+      b.onclick = () => {
+        p.heroId = ch.id;
+        if (!p.nodeId) p.nodeId = data().START_NODE || "n01";
+        saveProgress();
+        box.querySelectorAll(".card").forEach((x) => x.classList.toggle("sel", x === b));
+        document.getElementById("storyMapContinue").disabled = false;
+        if (typeof SFX !== "undefined") SFX.select();
+      };
+    }
     box.appendChild(b);
   });
 }
@@ -324,7 +370,7 @@ function startNodeFlow(nodeId) {
   if (meta.type === "choice") {
     show("storyPanelScreen");
     const artEl = document.getElementById("storyPanelArt");
-    artEl.innerHTML = STORY_SVG[c.art] || STORY_SVG.corridor;
+    artEl.innerHTML = paintScene(c.art, panelSceneMeta(nodeId));
     document.getElementById("storyPanelText").innerHTML = personalize(c.lines)
       .map((l) => `<p>${l}</p>`)
       .join("");
@@ -357,7 +403,11 @@ function showStoryPanels(panels, done) {
 function renderStoryPanel() {
   const p = Story.panelQueue[Story.panelIdx];
   if (!p) return;
-  document.getElementById("storyPanelArt").innerHTML = STORY_SVG[p.art] || STORY_SVG.victory;
+  document.getElementById("storyPanelArt").innerHTML = paintScene(p.art, {
+    heroId: p.heroId,
+    villainId: p.villainId,
+    bossName: p.bossName,
+  });
   document.getElementById("storyPanelText").innerHTML = p.lines.map((l) => `<p>${l}</p>`).join("");
   document.getElementById("storyPanelStep").textContent = `${Story.panelIdx + 1} / ${Story.panelQueue.length}`;
 }
@@ -372,6 +422,31 @@ function advanceStoryPanel() {
     return;
   }
   renderStoryPanel();
+}
+
+function syncDuelHud(storyOn) {
+  const on = storyOn !== false && !!Game?.storyMode;
+  const btn = document.getElementById("backBtn");
+  const cap = document.getElementById("storyDuelCaption");
+  if (btn) {
+    const lbl = btn.querySelector(".back-lbl");
+    const ico = btn.querySelector(".back-ico");
+    if (on) {
+      if (lbl) lbl.textContent = "Mapa";
+      if (ico) ico.textContent = "🗺️";
+    } else {
+      if (lbl) lbl.textContent = "Personajes";
+      if (ico) ico.textContent = "🏠";
+    }
+  }
+  if (cap) {
+    if (on && Game.storyChapter) {
+      const ch = Game.storyChapter;
+      cap.hidden = false;
+      const bit = ch.bossName || ch.title || "";
+      cap.textContent = ch.title && ch.bossName ? `${ch.title} · ${ch.bossName}` : bit;
+    } else cap.hidden = true;
+  }
 }
 
 function startStoryDuel(chapter) {
@@ -390,6 +465,7 @@ function startStoryDuel(chapter) {
   Game.storyChapter = chapter;
   if (typeof ac === "function") ac();
   window.startGame();
+  syncDuelHud(true);
 }
 window.startStoryDuel = startStoryDuel;
 
@@ -533,5 +609,6 @@ window.StoryMode = {
   openStoryEntry,
   resetStoryProgress,
   playerName,
-  STORY_SVG,
+  syncDuelHud,
+  paintScene,
 };

@@ -103,7 +103,6 @@ function personalizePanels(panels, name) {
 function renderProfileScreen() {
   const list = document.getElementById("profileList");
   const input = document.getElementById("profileNameInput");
-  const contBtn = document.getElementById("profileContinueBtn");
   if (!list) return;
   loadProfiles();
   const profiles = listProfiles();
@@ -116,21 +115,14 @@ function renderProfileScreen() {
       (p.story.completedNodes?.length || p.story.nodeId) &&
       !p.story.completed;
     row.innerHTML = `
-      <button type="button" class="profile-pick btn glass" data-id="${p.id}">
+      <button type="button" class="profile-pick btn big glass" data-id="${p.id}">
         <span class="profile-name">${p.name}</span>
-        <span class="profile-hint">${canContinue ? "Continuar historia" : p.story?.heroId ? "Historia en pausa" : "Nueva partida"}</span>
+        <span class="profile-hint">${canContinue ? "▶️ Continuar" : "▶️ Jugar"}</span>
       </button>
       <button type="button" class="profile-del" data-del="${p.id}" aria-label="Borrar">🗑️</button>`;
     list.appendChild(row);
   });
-  const active = activeProfile();
-  if (contBtn) {
-    const ok =
-      active?.story?.heroId &&
-      (active.story.nodeId || active.story.completedNodes?.length);
-    contBtn.hidden = !ok || active.story.completed;
-  }
-  if (input && active) input.value = active.name;
+  if (input) input.value = "";
 }
 
 function wireProfileUI() {
@@ -143,22 +135,6 @@ function wireProfileUI() {
     }
     if (typeof SFX !== "undefined") SFX.select();
     window.StoryMode?.onProfilePicked?.(p);
-  });
-  document.getElementById("profileContinueBtn")?.addEventListener("click", () => {
-    const p = activeProfile();
-    if (!p?.story?.heroId) return;
-    if (typeof SFX !== "undefined") SFX.select();
-    window.StoryMode?.enterStoryWithProfile?.(p, true);
-  });
-  document.getElementById("profileNewLink")?.addEventListener("click", () => {
-    const input = document.getElementById("profileNameInput");
-    if (input) {
-      input.value = "";
-      input.focus();
-    }
-    setActiveProfile(null);
-    renderProfileScreen();
-    if (typeof SFX !== "undefined") SFX.select();
   });
   document.getElementById("profileBack")?.addEventListener("click", () => {
     if (typeof show === "function") show("modeScreen");
@@ -183,7 +159,10 @@ function wireProfileUI() {
     const id = pick.getAttribute("data-id");
     setActiveProfile(id);
     const prof = activeProfile();
-    if (prof) window.StoryMode?.onProfilePicked?.(prof);
+    if (prof) {
+      const cont = !!(prof.story?.heroId && !prof.story.completed);
+      window.StoryMode?.enterStoryWithProfile?.(prof, cont);
+    }
   });
 }
 

@@ -285,6 +285,7 @@ for (const s of storySizes) {
   await page.click('#btnModeStory');
   await page.waitForSelector('#profileScreen.show', { timeout: 10000 });
   await page.screenshot({ path: join(storyDir, `${s.name}-profile.png`) });
+  if (s.name === '390x844') await page.screenshot({ path: join(storyDir, `${s.name}-profile-v2.png`) });
   await page.evaluate(() => {
     const p = window.ProfileStore.createProfile('Emilia');
     window.StoryMode.onProfilePicked(p);
@@ -297,7 +298,9 @@ for (const s of storySizes) {
     { timeout: 20000 }
   );
   if (await page.locator('#storyHeroScreen.show').count()) {
-    await page.evaluate(() => document.querySelector('#storyHeroCards .card')?.click());
+    await page.evaluate(() =>
+      document.querySelector('#storyHeroCards .story-hero-card:not([disabled])')?.click()
+    );
     await page.click('#storyMapContinue');
     await page.waitForSelector('#storyMapScreen.show', { timeout: 15000 });
   }
@@ -312,6 +315,12 @@ for (const s of storySizes) {
   await page.waitForSelector('#storyPanelScreen.show', { timeout: 5000 });
   await page.waitForSelector('#storyChoiceRow:not([hidden])', { timeout: 5000 });
   await page.screenshot({ path: join(storyDir, `${s.name}-story-choice.png`) });
+  if (s.name === '390x844') await page.screenshot({ path: join(storyDir, `${s.name}-story-choice-v2.png`) });
+  const artBlank = await page.evaluate(() => {
+    const html = document.getElementById('storyPanelArt')?.innerHTML || '';
+    return window.StoryScenes?.sceneLooksBlank?.(html) ?? html.length < 120;
+  });
+  if (artBlank) errors.push(`${s.name}-story-choice: panel art looks blank`);
   await page.evaluate(() => {
     StoryMode.showStoryPanels(
       [{ art: 'tunnel', lines: ['Emilia, un cuento especial comienza.', 'Toca siguiente para seguir.'] }],
@@ -320,6 +329,13 @@ for (const s of storySizes) {
   });
   await page.waitForSelector('#storyPanelScreen.show', { timeout: 5000 });
   await page.screenshot({ path: join(storyDir, `${s.name}-story-scene.png`) });
+  if (s.name === '390x844') await page.screenshot({ path: join(storyDir, `${s.name}-story-scene-v2.png`) });
+  if (s.name === '1180x820') await page.screenshot({ path: join(storyDir, `${s.name}-story-scene-v2.png`) });
+  const sceneBlank = await page.evaluate(() => {
+    const html = document.getElementById('storyPanelArt')?.innerHTML || '';
+    return window.StoryScenes?.sceneLooksBlank?.(html) ?? html.length < 120;
+  });
+  if (sceneBlank) errors.push(`${s.name}-story-scene: panel art looks blank`);
   await page.evaluate(() => {
     document.querySelectorAll('.screen').forEach((el) => el.classList.remove('show'));
     const card = document.getElementById('storyRewardOverlay');
@@ -332,6 +348,7 @@ for (const s of storySizes) {
     document.getElementById('storyRewardLvl').textContent = '¡Nivel 2!';
   });
   await page.screenshot({ path: join(storyDir, `${s.name}-story-reward.png`) });
+  if (s.name === '390x844') await page.screenshot({ path: join(storyDir, `${s.name}-story-reward-v2.png`) });
   await page.evaluate(() => {
     document.getElementById('storyRewardOverlay').classList.remove('show');
     StoryMode.startStoryDuel({
