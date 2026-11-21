@@ -119,6 +119,25 @@ function panelsFrom(nodeId, extra) {
   ];
 }
 
+function canEnterNode(nodeId, p) {
+  if (!p) p = loadStoryProgress();
+  if (p.completedNodes.includes(nodeId)) return true;
+  const cur = p.nodeId || data().START_NODE || "n01";
+  return nodeId === cur;
+}
+
+/** Avanza solo desde el episodio activo (narrativa / elección). Los duelos usan handleStoryWin. */
+function completeNarrativeNode(nodeId) {
+  const p = loadStoryProgress();
+  const meta = nodeMeta(nodeId);
+  if (!meta || meta.type === "duel") return;
+  const cur = p.nodeId || data().START_NODE || "n01";
+  if (nodeId !== cur) return;
+  if (!p.completedNodes.includes(nodeId)) p.completedNodes.push(nodeId);
+  if (meta.next) p.nodeId = meta.next;
+  saveProgress();
+}
+
 function pathUsesNode(nodeId, branches) {
   const G = data().GRAPH_NODES;
   const walk = (id, depth = 0) => {
@@ -227,6 +246,8 @@ function showChoiceUI(nodeId) {
 
 function pickChoice(nodeId, opt) {
   const p = loadStoryProgress();
+  const cur = p.nodeId || data().START_NODE || "n01";
+  if (nodeId !== cur) return;
   const meta = nodeMeta(nodeId);
   if (meta?.choiceKey) p.branches[meta.choiceKey] = opt.branch || opt.id;
   if (!p.completedNodes.includes(nodeId)) p.completedNodes.push(nodeId);
@@ -318,7 +339,10 @@ function renderStoryMap() {
       (meta?.type === "choice" ? " story-choice-node" : "");
     const boss = c?.bossName || (meta?.type === "duel" ? "Duelo" : meta?.type === "choice" ? "Decisión" : "Cuento");
     node.innerHTML = `<span class="story-node-num">${idx}</span><span class="story-node-t">${c?.title || nodeId}</span><span class="story-node-b">${boss}</span>`;
-    if (!locked) node.onclick = () => startNodeFlow(nodeId);
+    if (!locked) {
+      const id = nodeId;
+      node.onclick = () => startNodeFlow(id);
+    }
     map.appendChild(node);
     const line = document.createElement("div");
     line.className = "story-connector" + (done ? " lit" : "");
@@ -361,12 +385,16 @@ function buildDuelChapter(nodeId) {
 function startNodeFlow(nodeId) {
   const p = loadStoryProgress();
   if (!p.heroId) return;
+  if (!canEnterNode(nodeId, p)) return;
   const meta = nodeMeta(nodeId);
   const c = heroContent(nodeId);
   if (!meta || !c) return;
   Story.activeNode = nodeId;
-  p.nodeId = nodeId;
-  saveProgress();
+  const cur = p.nodeId || data().START_NODE || "n01";
+  if (!p.completedNodes.includes(nodeId) && nodeId === cur) {
+    p.nodeId = nodeId;
+    saveProgress();
+  }
   if (meta.type === "choice") {
     show("storyPanelScreen");
     const artEl = document.getElementById("storyPanelArt");
@@ -383,11 +411,9 @@ function startNodeFlow(nodeId) {
     return;
   }
   showStoryPanels(panelsFrom(nodeId), () => {
-    if (!p.completedNodes.includes(nodeId)) p.completedNodes.push(nodeId);
-    p.nodeId = meta.next;
-    saveProgress();
-    if (meta.next) renderStoryMap();
-    else show("storyMapScreen");
+    completeNarrativeNode(nodeId);
+    renderStoryMap();
+    show("storyMapScreen");
   });
 }
 
@@ -455,15 +481,19 @@ function startStoryDuel(chapter) {
   const heroId = p.heroId || window.sel?.hero;
   const hero = window.HEROES.find((h) => h.id === heroId);
   const vill = window.VILLAINS.find((v) => v.id === chapter.villainId);
-  if (!hero || !vill) return;
-  const theme = (typeof sel !== "undefined" && sel?.theme) || "gryffindor";
-  if (typeof sel !== "undefined") {
-    sel.hero = hero.id;
-    sel.villain = vill.id;
-    sel.theme = theme;
+  if (!hero || !vill) {
+    console.error("startStoryDuel: héroe o rival no encontrado", heroId, chapter.villainId);
+    return;
+  }
+  const theme = window.sel?.theme || "gryffindor";
+  if (window.sel) {
+    window.sel.hero = hero.id;
+    window.sel.villain = vill.id;
+    window.sel.theme = theme;
   }
   Game.storyMode = true;
   Game.storyChapter = chapter;
+  Game.storyDuelNode = chapter.id;
   if (typeof ac === "function") ac();
   window.startGame();
   syncDuelHud(true);
@@ -474,6 +504,8 @@ function handleStoryWin() {
   const ch = Game.storyChapter;
   const p = loadStoryProgress();
   if (!ch) return;
+  const cur = p.nodeId || data().START_NODE || "n01";
+  if (ch.id !== cur && !p.completedNodes.includes(ch.id)) return;
   Game.running = false;
   Game.over = true;
   p.wins = (p.wins || 0) + 1;
