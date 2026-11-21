@@ -401,6 +401,7 @@ function showStoryPanels(panels, done) {
 }
 
 function renderStoryPanel() {
+  hideChoiceUI();
   const p = Story.panelQueue[Story.panelIdx];
   if (!p) return;
   document.getElementById("storyPanelArt").innerHTML = paintScene(p.art, {

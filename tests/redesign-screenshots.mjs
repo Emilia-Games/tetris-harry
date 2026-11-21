@@ -306,6 +306,7 @@ for (const s of storySizes) {
   }
   await page.evaluate(() => {
     const prog = window.ProfileStore.getProgress();
+    prog.heroId = 'harry';
     prog.completedNodes = ['n01', 'n02'];
     prog.nodeId = 'n03';
     window.ProfileStore.setProgress(prog);
@@ -321,25 +322,58 @@ for (const s of storySizes) {
     return window.StoryScenes?.sceneLooksBlank?.(html) ?? html.length < 120;
   });
   if (artBlank) errors.push(`${s.name}-story-choice: panel art looks blank`);
-  await page.evaluate(() => {
-    StoryMode.showStoryPanels(
-      [{ art: 'tunnel', lines: ['Emilia, un cuento especial comienza.', 'Toca siguiente para seguir.'] }],
-      () => {}
-    );
-  });
-  await page.waitForSelector('#storyPanelScreen.show', { timeout: 5000 });
+  if (s.name === '390x844') await page.screenshot({ path: join(storyDir, `${s.name}-story-choice-v3.png`) });
+
+  async function openStoryNode(page, nodeId) {
+    await page.evaluate((id) => {
+      document.getElementById('storyRewardOverlay')?.classList.remove('show');
+      window.StoryMode.startNodeFlow(id);
+    }, nodeId);
+    await page.waitForSelector('#storyPanelScreen.show', { timeout: 10000 });
+    const choiceOpen = await page.locator('#storyChoiceRow:not([hidden])').count();
+    if (!choiceOpen) {
+      await page.waitForSelector('#storyPanelNext:not([hidden])', { timeout: 5000 });
+    }
+    const badUi = await page.evaluate(() => {
+      const choice = !document.getElementById('storyChoiceRow')?.hasAttribute('hidden');
+      const next = !document.getElementById('storyPanelNext')?.hasAttribute('hidden');
+      return choice && next;
+    });
+    if (badUi) errors.push(`${s.name}-story-node-${nodeId}: choice and Siguiente both visible`);
+    return choiceOpen;
+  }
+
+  await openStoryNode(page, 'n01');
   await page.screenshot({ path: join(storyDir, `${s.name}-story-scene.png`) });
-  if (s.name === '390x844') await page.screenshot({ path: join(storyDir, `${s.name}-story-scene-v2.png`) });
-  if (s.name === '1180x820') await page.screenshot({ path: join(storyDir, `${s.name}-story-scene-v2.png`) });
-  const sceneBlank = await page.evaluate(() => {
-    const html = document.getElementById('storyPanelArt')?.innerHTML || '';
-    return window.StoryScenes?.sceneLooksBlank?.(html) ?? html.length < 120;
-  });
-  if (sceneBlank) errors.push(`${s.name}-story-scene: panel art looks blank`);
+  let sceneBlank = await page.evaluate(() =>
+    window.StoryScenes.sceneLooksBlank(document.getElementById('storyPanelArt')?.innerHTML || '')
+  );
+  if (sceneBlank) errors.push(`${s.name}-story-scene-n01: panel art looks blank`);
+
+  if (s.name === '390x844') {
+    await page.screenshot({ path: join(storyDir, `${s.name}-story-scene-v3-corridor.png`) });
+    await openStoryNode(page, 'n07');
+    await page.screenshot({ path: join(storyDir, `${s.name}-story-scene-v3-forest.png`) });
+    sceneBlank = await page.evaluate(() =>
+      window.StoryScenes.sceneLooksBlank(document.getElementById('storyPanelArt')?.innerHTML || '')
+    );
+    if (sceneBlank) errors.push(`${s.name}-story-scene-v3-forest: blank`);
+    await openStoryNode(page, 'n24');
+    await page.screenshot({ path: join(storyDir, `${s.name}-story-scene-v3-voldemort.png`) });
+  }
+  if (s.name === '1180x820') {
+    await openStoryNode(page, 'n01');
+    await page.screenshot({ path: join(storyDir, `${s.name}-story-scene-v3.png`) });
+  }
+
   await page.evaluate(() => {
     document.querySelectorAll('.screen').forEach((el) => el.classList.remove('show'));
-    const card = document.getElementById('storyRewardOverlay');
-    card.classList.add('show');
+    document.getElementById('storyChoiceRow')?.setAttribute('hidden', '');
+    document.getElementById('storyPanelScreen')?.classList.remove('show');
+    document.getElementById('storyRewardOverlay').classList.remove('show');
+  });
+  await page.evaluate(() => {
+    document.getElementById('storyRewardOverlay').classList.add('show');
     document.getElementById('storyRewardTitle').textContent = '¡Nueva magia!';
     document.getElementById('storyRewardIcon').textContent = '💡';
     document.getElementById('storyRewardName').textContent = 'Lumos';
@@ -347,8 +381,9 @@ for (const s of storySizes) {
       'Cada línea te da un poquito de magia (+3 vida).';
     document.getElementById('storyRewardLvl').textContent = '¡Nivel 2!';
   });
+  await page.waitForTimeout(800);
   await page.screenshot({ path: join(storyDir, `${s.name}-story-reward.png`) });
-  if (s.name === '390x844') await page.screenshot({ path: join(storyDir, `${s.name}-story-reward-v2.png`) });
+  if (s.name === '390x844') await page.screenshot({ path: join(storyDir, `${s.name}-story-reward-v3.png`) });
   await page.evaluate(() => {
     document.getElementById('storyRewardOverlay').classList.remove('show');
     StoryMode.startStoryDuel({
