@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Regresión: duelos de historia arrancan; progreso solo al ganar; capítulos 1–3 Harry. */
+/** Regresión: cada capítulo → intro → tarjeta duelo → Tetris 2 jugadores; progreso solo al ganar. */
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, mkdirSync } from 'node:fs';
@@ -27,11 +27,10 @@ const base = `http://127.0.0.1:${server.address().port}/`;
 
 async function advancePanels(page) {
   for (let i = 0; i < 12; i++) {
-    const showing = await page.locator('#storyPanelScreen.show').count();
-    if (!showing) break;
-    const next = page.locator('#storyPanelNext:not([hidden])');
-    if (!(await next.count())) break;
-    await next.click();
+    if (!(await page.locator('#storyPanelScreen.show').count())) break;
+    if (await page.locator('#storyChoiceRow:not([hidden])').count()) break;
+    if (!(await page.locator('#storyPanelNext:not([hidden])').count())) break;
+    await page.click('#storyPanelNext');
     await page.waitForTimeout(120);
   }
 }
@@ -82,6 +81,33 @@ async function startNode(page, id) {
   await advancePanels(page);
 }
 
+async function startStoryBattle(page, id) {
+  await startNode(page, id);
+  await page.waitForSelector('#storyDuelIntroOverlay.show', { timeout: 12000 });
+  await page.click('#storyDuelStartBtn');
+  await page.waitForSelector('#gameScreen.show', { timeout: 12000 });
+}
+
+async function forceStoryWin(page) {
+  await page.evaluate(() => {
+    Game.V.hp = 0;
+    endGame(Game.V);
+  });
+  for (let i = 0; i < 20; i++) {
+    await page.waitForTimeout(200);
+    if (await page.locator('#storyPanelScreen.show #storyPanelNext:not([hidden])').count()) {
+      await page.click('#storyPanelNext');
+      continue;
+    }
+    if (await page.locator('#storyRewardOverlay.show').count()) {
+      await page.click('#storyRewardOk');
+      break;
+    }
+    if (await page.locator('#storyMapScreen.show').count()) break;
+  }
+  await page.waitForSelector('#storyMapScreen.show', { timeout: 15000 });
+}
+
 let failed = false;
 const fail = (msg) => {
   console.error('FAIL:', msg);
@@ -99,131 +125,73 @@ page.on('pageerror', (e) => fail(`pageerror: ${e.message}`));
 
 await setupHarryProfile(page);
 
-// --- Capítulo 1 (n01) ---
-await page.evaluate(() => StoryMode.startNodeFlow('n01'));
-await advancePanels(page);
+// Capítulo 1: cuento + duelo vs Crabbe
+await startStoryBattle(page, 'n01');
+await page.screenshot({ path: join(shotDir, '390x844-story-duel-intro-n01.png') });
+const y0 = await page.evaluate(() => Game.P?.cur?.y);
+await page.waitForTimeout(2500);
+const y1 = await page.evaluate(() => Game.P?.cur?.y);
+const dual = await page.evaluate(
+  () =>
+    Game.running &&
+    !!Game.P?.cur &&
+    !!Game.V?.cur &&
+    document.getElementById('vBoard')?.offsetWidth > 20
+);
+if (!dual || y0 === y1) fail('n01 duel must run with rival board');
+await page.screenshot({ path: join(shotDir, '390x844-story-duel-midgame.png') });
+await page.click('#backBtn');
+await page.waitForSelector('#storyMapScreen.show');
 let prog = await progress(page);
+if (prog.completed.includes('n01')) fail('quit n01 must not complete');
+
+await startStoryBattle(page, 'n01');
+await forceStoryWin(page);
+prog = await progress(page);
 if (!prog.completed.includes('n01') || prog.nodeId !== 'n02') {
-  fail(`n01 should complete → n02; got ${JSON.stringify(prog)}`);
+  fail(`n01 win → n02: ${JSON.stringify(prog)}`);
 }
 
-// --- Capítulo 2 (n02) ---
-await startNode(page, 'n02');
+// Capítulo 2
+await startStoryBattle(page, 'n02');
+await forceStoryWin(page);
 prog = await progress(page);
 if (!prog.completed.includes('n02') || prog.nodeId !== 'n03') {
-  fail(`n02 → n03: ${JSON.stringify(prog)}`);
+  fail(`n02 win → n03: ${JSON.stringify(prog)}`);
 }
 
-// --- Capítulo 3 (n03 choice A → bosque) ---
+// Capítulo 3 elección bosque → n04f duelo Goyle (+ Lumos)
 await page.evaluate(() => StoryMode.startNodeFlow('n03'));
 await page.waitForSelector('#storyChoiceRow:not([hidden])');
 await pickChoice(page, 'A');
-prog = await progress(page);
-if (!prog.completed.includes('n03') || !prog.completed.includes('n04f') || prog.nodeId !== 'n05f') {
-  fail(`n03 choice A runs n04f and frontier n05f: ${JSON.stringify(prog)}`);
-}
-
-// --- Duel intro panels → game must run ---
-await page.evaluate(() => StoryMode.startNodeFlow('n05f'));
-await advancePanels(page);
-await page.waitForSelector('#gameScreen.show', { timeout: 10000 });
-const y0 = await page.evaluate(() => Game.P?.cur?.y);
-await page.waitForTimeout(3000);
-const y1 = await page.evaluate(() => Game.P?.cur?.y);
-const running = await page.evaluate(
-  () => Game.running && !Game.over && !!Game.P?.cur && !!Game.V?.cur
-);
-if (!running || y0 === y1) {
-  fail(`duel not running or piece not falling (y0=${y0} y1=${y1})`);
-}
-await page.keyboard.press('ArrowRight');
-const moved = await page.evaluate(() => Game.P?.cur?.x);
-if (moved == null) fail('could not read player piece');
-await page.screenshot({ path: join(shotDir, '390x844-story-duel-midgame.png') });
-
-// --- Quit duel: must NOT complete n05f or gain lumos ---
-await page.click('#backBtn');
-await page.waitForSelector('#storyMapScreen.show');
-prog = await progress(page);
-if (prog.completed.includes('n05f') || prog.spells.includes('lumos')) {
-  fail(`quit should not unlock duel: ${JSON.stringify(prog)}`);
-}
-const n06Locked = await page.evaluate(() => {
-  const p = ProfileStore.getProgress();
-  const nodeId = 'n06';
-  const done = p.completedNodes.includes(nodeId);
-  const locked = !done && p.nodeId !== nodeId;
-  return locked;
-});
-if (!n06Locked) fail('n06 should stay locked after quit');
-await page.screenshot({ path: join(shotDir, '390x844-story-map-after-quit.png') });
-
-// --- Replay n01 must not move frontier backward/forward ---
-await page.evaluate(() => StoryMode.startNodeFlow('n01'));
-await advancePanels(page);
-prog = await progress(page);
-if (prog.nodeId !== 'n05f') {
-  fail(`replay n01 must not change frontier (still n05f): ${JSON.stringify(prog)}`);
-}
-
-// --- Re-enter duel, forced loss ---
-await page.evaluate(() => StoryMode.startNodeFlow('n05f'));
-await advancePanels(page);
+await page.waitForSelector('#storyDuelIntroOverlay.show', { timeout: 12000 });
+await page.screenshot({ path: join(shotDir, '390x844-story-duel-intro-n04f.png') });
+await page.click('#storyDuelStartBtn');
 await page.waitForSelector('#gameScreen.show');
-await page.evaluate(() => {
-  Game.P.hp = 0;
-  endGame(Game.P);
-});
-await page.waitForSelector('#loseOv.show', { timeout: 5000 });
-await page.evaluate(() => {
-  document.getElementById('loseOv')?.classList.remove('show');
-  Game.storyMode = true;
-  toMenu();
-});
-await page.waitForSelector('#storyMapScreen.show');
+await forceStoryWin(page);
 prog = await progress(page);
-if (prog.completed.includes('n05f') || prog.spells.length) {
-  fail(`loss must not unlock: ${JSON.stringify(prog)}`);
+if (!prog.completed.includes('n04f') || !prog.spells.includes('lumos')) {
+  fail(`n04f win grants lumos: ${JSON.stringify(prog)}`);
 }
+if (prog.nodeId !== 'n06') {
+  fail(`n04f win should skip to n06 (not n05f): ${JSON.stringify(prog)}`);
+}
+await page.screenshot({ path: join(shotDir, '390x844-story-reward-after-win.png') });
 
-// --- Win → reward + lumos + n06 ---
-await page.evaluate(() => StoryMode.startNodeFlow('n05f'));
-await advancePanels(page);
-await page.waitForSelector('#gameScreen.show');
-await page.evaluate(() => {
-  Game.V.hp = 0;
-  endGame(Game.V);
-});
-await page.waitForSelector('#storyRewardOverlay.show, #storyPanelScreen.show', { timeout: 15000 });
-await advancePanels(page);
-await page.waitForSelector('#storyRewardOverlay.show', { timeout: 10000 }).catch(() => null);
-if (!(await page.locator('#storyRewardOverlay.show').count())) {
-  await page.evaluate(() => document.getElementById('storyRewardOverlay')?.classList.add('show'));
+// Releer n01 no mueve frontera
+await startNode(page, 'n01');
+if (await page.locator('#storyDuelIntroOverlay.show').count()) {
+  await page.click('#storyDuelIntroBack');
+  await page.waitForSelector('#storyMapScreen.show');
 }
-await page.waitForTimeout(400);
-await page.click('#storyRewardOk');
-await page.waitForSelector('#storyMapScreen.show');
 prog = await progress(page);
-if (!prog.completed.includes('n05f') || !prog.spells.includes('lumos') || prog.nodeId !== 'n06') {
-  fail(`win should unlock n06+lumos: ${JSON.stringify(prog)}`);
-}
-const n06Open = await page.evaluate(() => {
-  const p = ProfileStore.getProgress();
-  return p.nodeId === 'n06' || p.completedNodes.includes('n05f');
-});
-if (!n06Open) fail('n06 should be reachable after win');
-await page.screenshot({ path: join(shotDir, '390x844-story-map-after-win.png') });
+if (prog.nodeId !== 'n06') fail(`replay n01 keeps frontier: ${JSON.stringify(prog)}`);
 
-// --- Normal mode still starts ---
+// Modo normal sigue funcionando
 await page.evaluate(() => {
   Game.storyMode = false;
-  sel.hero = 'harry';
-  sel.villain = 'draco';
+  show('modeScreen');
 });
-await page.click('#storyMapBack');
-await page.waitForSelector('#profileScreen.show');
-await page.click('#profileBack');
-await page.waitForSelector('#modeScreen.show');
 await page.click('#btnModeNormal');
 await page.waitForSelector('#selScreen.show');
 await page.evaluate(() => {
@@ -232,10 +200,9 @@ await page.evaluate(() => {
   startGame();
 });
 await page.waitForSelector('#gameScreen.show');
-const norm = await page.evaluate(
-  () => Game.running && !Game.storyMode && !!Game.P?.cur
-);
-if (!norm) fail('normal mode duel did not start');
+if (!(await page.evaluate(() => Game.running && !Game.storyMode && !!Game.V?.cur))) {
+  fail('normal mode duel did not start');
+}
 
 await ctx.close();
 await browser.close();

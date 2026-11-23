@@ -1,0 +1,65 @@
+[
+  {
+    "viewport": "390x844",
+    "chapter": "n01",
+    "game": false,
+    "map": true,
+    "running": false
+  },
+  {
+    "viewport": "390x844",
+    "chapter": "n02",
+    "game": false,
+    "map": true,
+    "running": false
+  },
+  {
+    "viewport": "390x844",
+    "chapter": "n03",
+    "game": false,
+    "map": false,
+    "running": false
+  },
+  {
+    "viewport": "1024x768",
+    "chapter": "n01",
+    "game": false,
+    "map": true,
+    "running": false
+  },
+  {
+    "viewport": "1024x768",
+    "chapter": "n02",
+    "game": false,
+    "map": true,
+    "running": false
+  },
+  {
+    "viewport": "1024x768",
+    "chapter": "n03",
+    "game": false,
+    "map": false,
+    "running": false
+  },
+  {
+    "viewport": "1440x900",
+    "chapter": "n01",
+    "game": false,
+    "map": true,
+    "running": false
+  },
+  {
+    "viewport": "1440x900",
+    "chapter": "n02",
+    "game": false,
+    "map": true,
+    "running": false
+  },
+  {
+    "viewport": "1440x900",
+    "chapter": "n03",
+    "game": false,
+    "map": false,
+    "running": false
+  }
+]
